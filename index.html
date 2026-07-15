@@ -161,19 +161,21 @@
   .tab-btn { flex: 0 0 auto; border: 1px solid var(--stroke); background: var(--glass); color: var(--muted); font: inherit; font-size: 0.8rem; font-weight: 600; padding: 8px 15px; border-radius: 99px; cursor: pointer; white-space: nowrap; transition: all 0.25s var(--ease-ios); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
   .tab-btn.active { background: var(--accent); color: #fff; border-color: transparent; }
 
-  .summary { display: flex; align-items: stretch; padding: 4px 4px; margin-bottom: 8px; }
-  .stat { flex: 1; padding: 10px 8px; text-align: center; position: relative; }
-  .stat + .stat::before { content: ""; position: absolute; left: 0; top: 18%; height: 64%; width: 1px; background: var(--stroke); }
-  .stat-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-2); margin-bottom: 4px; }
+  /* Übersicht: eine Karte mit Countdown + Weltkarte + Stats */
+  .ov-card { padding: 20px 20px 6px; margin-bottom: 4px; }
+  .ov-top { display: flex; align-items: center; gap: 14px; }
+  .ov-cd { flex: 1 1 auto; min-width: 0; }
+  .ov-cd-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--petrol); font-weight: 700; }
+  .ov-cd-val { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; margin-top: 6px; line-height: 1; }
+  .ov-cd-sub { font-size: 0.8rem; color: var(--muted-2); margin-top: 8px; }
+  .ov-map { flex: 0 0 40%; max-width: 150px; height: 104px; opacity: 0.9; pointer-events: none; }
+  .ov-map svg { width: 100%; height: 100%; display: block; }
+  .ov-stats { display: flex; align-items: stretch; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--stroke); }
+  .stat { flex: 1; padding: 4px 6px 10px; text-align: center; position: relative; min-width: 0; }
+  .stat + .stat::before { content: ""; position: absolute; left: 0; top: 6%; height: 72%; width: 1px; background: var(--stroke); }
+  .stat-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-2); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .stat-value { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-
-  .hero-countdown { text-align: center; padding: 22px 0 20px; }
-  .hero-countdown-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--petrol); font-weight: 700; }
-  .hero-countdown-val { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; margin-top: 6px; line-height: 1; }
-  .hero-countdown-sub { font-size: 0.8rem; color: var(--muted-2); margin-top: 10px; }
-
-  .notes-box { padding: 16px 18px; font-size: 0.85rem; line-height: 1.55; color: var(--muted); white-space: pre-wrap; }
-  .notes-box.empty-text { color: var(--muted-2); font-style: italic; }
+  .sl-count { color: var(--muted-2); font-weight: 600; }
 
   .check-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 16px; cursor: pointer; transition: background 0.2s; }
   .check-row:hover { background: var(--glass-hi); }
@@ -301,7 +303,6 @@
       <h2 id="ts-name">Reise</h2>
       <p id="ts-dest">&nbsp;</p>
     </div>
-    <button class="icon-btn" aria-label="Reise bearbeiten" onclick="openModal('trip', currentTripId)">✎</button>
   </div>
   <div class="tab-bar" id="tab-bar"></div>
   <div id="tab-content"></div>
@@ -726,7 +727,7 @@ async function deleteTripById(id){
 
 /* ===== REISE-DETAIL ===== */
 let currentTripId = null, activeTab = 'overview';
-const TABS = [['overview','Übersicht'],['route','Route'],['hotels','Unterkünfte'],['flights','Flüge'],['activities','Aktivitäten'],['packing','Packliste'],['todos','Checkliste']];
+const TABS = [['overview','Übersicht'],['route','Route'],['hotels','Unterkünfte'],['flights','Flüge'],['activities','Aktivitäten'],['packing','Packliste']];
 
 function openTripScreen(id){ currentTripId=id; activeTab='overview'; renderTripScreen(); $('trip-screen').classList.add('open'); }
 function closeTripScreen(){ $('trip-screen').classList.remove('open'); currentTripId=null; renderHome(); }
@@ -737,43 +738,48 @@ function renderTripScreen(){
   const t = currentTrip();
   if (!t) { closeTripScreen(); return; }
   $('ts-name').textContent = t.name;
-  $('ts-dest').textContent = t.country || t.destination || '\u00A0';
+  const land = t.country || t.destination || '';
+  const range = (t.start || t.end) ? `${fmtDate(t.start)||'?'} – ${fmtDate(t.end)||'?'}` : '';
+  $('ts-dest').textContent = [land, range].filter(Boolean).join(' · ') || '\u00A0';
   $('tab-bar').innerHTML = TABS.map(([k,l]) => `<button class="tab-btn ${activeTab===k?'active':''}" onclick="switchTab('${k}')">${l}</button>`).join('');
   renderTabContent();
 }
 function renderTabContent(){
   const t = currentTrip(); if(!t) return;
   const el = $('tab-content');
-  const map = { overview:renderOverviewTab, route:renderRouteTab, hotels:renderHotelsTab, flights:renderFlightsTab, activities:renderActivitiesTab, packing:renderPackingTab, todos:renderTodosTab };
+  const map = { overview:renderOverviewTab, route:renderRouteTab, hotels:renderHotelsTab, flights:renderFlightsTab, activities:renderActivitiesTab, packing:renderPackingTab };
   el.innerHTML = map[activeTab](t);
 }
 
 function renderOverviewTab(t){
   const c = id => arr(id).filter(x=>x.tripId===t.id).length;
   const du = daysUntil(t.start);
-  let cd = '';
+  // Countdown-Text
+  let big='—', sub='Kein Datum festgelegt';
   if (t.start) {
-    let l, s;
-    if (du>0){l=du;s=`Tag${du===1?'':'e'} bis ${esc(t.name)}`;}
-    else if(du===0){l='Heute';s='Die Reise beginnt!';}
-    else {l='Unterwegs';s=(t.end&&todayISO()>t.end)?'Reise abgeschlossen':'Reise läuft';}
-    cd = `<div class="hero-countdown glass"><div class="hero-countdown-label">Countdown</div><div class="hero-countdown-val">${l}</div><div class="hero-countdown-sub">${s}</div></div>`;
+    if (du>0){ big=du; sub=`Tag${du===1?'':'e'} bis ${esc(t.name)}`; }
+    else if (du===0){ big='Heute'; sub='Die Reise beginnt!'; }
+    else { big='Unterwegs'; sub=(t.end&&todayISO()>t.end)?'Reise abgeschlossen':'Reise läuft'; }
   }
-  return `${cd}
-    <div class="glass summary">
+  const map = t.country ? tripMapSVG(t.country) : '';
+  // Eine Karte: Countdown + Weltkarte oben, Stats darunter
+  const hero = `<div class="glass ov-card">
+    <div class="ov-top">
+      <div class="ov-cd">
+        <div class="ov-cd-label">Countdown</div>
+        <div class="ov-cd-val">${typeof big==='number'?big:esc(big)}</div>
+        <div class="ov-cd-sub">${sub}</div>
+      </div>
+      ${map ? `<div class="ov-map">${map}</div>` : ''}
+    </div>
+    <div class="ov-stats">
       <div class="stat"><div class="stat-label">Stopps</div><div class="stat-value">${c('stop')}</div></div>
       <div class="stat"><div class="stat-label">Unterkünfte</div><div class="stat-value">${c('hotel')}</div></div>
       <div class="stat"><div class="stat-label">Flüge</div><div class="stat-value">${c('flight')}</div></div>
       <div class="stat"><div class="stat-label">Aktivitäten</div><div class="stat-value">${c('activity')}</div></div>
     </div>
-    <div class="section-label">Notizen</div>
-    <div class="notes-box glass ${t.notes?'':'empty-text'}">${t.notes?esc(t.notes):'Keine Notizen hinterlegt.'}</div>
-    <div class="section-label">Reisedaten</div>
-    <div class="list"><div class="entry" onclick="openModal('trip', currentTripId)">
-      <div class="entry-main"><div class="entry-name">${esc(t.name)}</div>
-      <div class="entry-sub">${t.country?esc(t.country)+' · ':''}${(t.start||t.end)?(fmtDate(t.start)||'?')+' – '+(fmtDate(t.end)||'?'):'Kein Datum'}</div>
-      ${t.country?`<div class="entry-pills"><span class="cat-pill pill-green">${esc(t.country)}</span></div>`:''}</div>
-      <div class="entry-right">✎</div></div></div>`;
+  </div>`;
+  return hero + renderTodosSection(t);
 }
 function stopLabel(id){ const s=stops.find(x=>x.id===id); return s?s.name:''; }
 
@@ -821,13 +827,13 @@ function renderPackingTab(t){
 function quickAddPack(){ const inp=$('quick-pack-name'); const n=inp.value.trim(); if(!n) return; packing.push({id:uid(),tripId:currentTripId,name:n,category:'Sonstiges',checked:false}); persist('pack'); inp.value=''; renderTabContent(); }
 async function loadPackTemplate(){ const ok=await showDialog('Fügt eine Standard-Packliste mit gängigen Kategorien hinzu.',{title:'Standard-Vorlage laden',okText:'Hinzufügen'}); if(!ok) return; PACK_TEMPLATE.forEach(([name,category])=>packing.push({id:uid(),tripId:currentTripId,name,category,checked:false})); persist('pack'); renderTabContent(); }
 
-function renderTodosTab(t){
+function renderTodosSection(t){
   const list = todos.filter(s=>s.tripId===t.id).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
   const done = list.filter(i=>i.checked).length;
-  let body;
-  if (!list.length) body = `<div class="empty glass"><b>Noch keine Aufgaben</b>Was muss vor der Reise erledigt werden? z.B. Impfungen, Visum, Reiseversicherung.</div>`;
-  else body = `<div class="check-progress">${done} von ${list.length} erledigt</div><div class="check-group glass" style="padding:6px">${list.map(i=>{const od=i.due&&!i.checked&&i.due<todayISO();return `<div class="check-row ${i.checked?'checked':''}" onclick="toggleCheck('todo','${i.id}')"><div class="checkbox ${i.checked?'checked':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="check-body"><div class="check-name">${esc(i.name)}</div>${i.due?`<div class="check-sub ${od?'overdue':''}">${od?'Überfällig · ':'Fällig bis '}${fmtDate(i.due)}</div>`:''}</div><button class="check-del" onclick="event.stopPropagation();removeItem('todo','${i.id}')">✕</button></div>`;}).join('')}</div>`;
-  return body + `<button class="add-btn" onclick="openModal('todo')" style="margin-top:14px">＋ Aufgabe hinzufügen</button>`;
+  let body = `<div class="section-label">Checkliste${list.length?` <span class="sl-count">${done}/${list.length}</span>`:''}</div>`;
+  if (!list.length) body += `<div class="empty glass"><b>Noch keine Aufgaben</b>Was muss vor der Reise erledigt werden? z.B. Impfungen, Visum, Reiseversicherung.</div>`;
+  else body += `<div class="check-group glass" style="padding:6px">${list.map(i=>{const od=i.due&&!i.checked&&i.due<todayISO();return `<div class="check-row ${i.checked?'checked':''}" onclick="toggleCheck('todo','${i.id}')"><div class="checkbox ${i.checked?'checked':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="check-body"><div class="check-name">${esc(i.name)}</div>${i.due?`<div class="check-sub ${od?'overdue':''}">${od?'Überfällig · ':'Fällig bis '}${fmtDate(i.due)}</div>`:''}</div><button class="check-del" onclick="event.stopPropagation();removeItem('todo','${i.id}')">✕</button></div>`;}).join('')}</div>`;
+  return body + `<button class="add-btn" onclick="openModal('todo')">＋ Aufgabe hinzufügen</button>`;
 }
 function toggleCheck(type,id){ const it=arr(type).find(x=>x.id===id); if(!it) return; it.checked=!it.checked; persist(type); renderTabContent(); }
 async function removeItem(type,id){ const ok=await showDialog('Diesen Eintrag wirklich löschen?',{title:'Löschen',okText:'Löschen'}); if(!ok) return; setArr(type, arr(type).filter(x=>x.id!==id)); persist(type); renderTabContent(); }
