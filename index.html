@@ -1153,7 +1153,10 @@ document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); 
   await migrateInlineImages();
   renderHome();
   initAppLock();
-  if ('serviceWorker' in navigator && location.protocol === 'https:') { navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+  // Service Worker registrieren (Offline-Fähigkeit); scheitert leise wenn nicht unterstützt (z.B. file://)
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
 })();
 </script>
 </body>
