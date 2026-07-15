@@ -90,20 +90,32 @@
   .bento-tile { background: #1c1c1e; border: 1px solid rgba(255,255,255,0.06); border-radius: 26px; padding: 15px 16px; min-width: 0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 10px 30px rgba(0,0,0,0.4); cursor: pointer; transition: transform 0.2s var(--spring); }
   .bento-tile:active { transform: scale(0.97); }
 
-  /* Reise-Kacheln (kompakt, wie Finanzen-Bento) */
+  /* Reise-Kacheln (kompakt, 2-spaltig wie Finanzen-Bento) */
   #trip-tiles .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .trip-tile { height: 178px; display: flex; flex-direction: column; }
-  .tt-name { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .tt-dest { font-size: 0.72rem; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tt-cd { margin-top: auto; display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+  /* Swipe-Architektur wie Finanzen: tile-wrap clippt, tile-slider verschiebt sich */
+  .tile-wrap { position: relative; border-radius: 26px; overflow: hidden; }
+  .tile-slider { display: flex; flex-direction: row; width: 100%; transition: transform 0.42s var(--spring); will-change: transform; }
+  .tile-slider.no-transition { transition: none; }
+  .tile-slider .trip-tile { flex: 0 0 100%; width: 100%; }
+  .tile-action-bg { display: flex; flex-direction: row; align-items: center; gap: 6px; padding: 6px 0 6px 6px; flex-shrink: 0; background: transparent; }
+  .swipe-edit, .swipe-del { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 64px; align-self: stretch; border-radius: 18px; color: #fff; cursor: pointer; flex-shrink: 0; transition: transform 0.3s var(--spring); }
+  .swipe-edit:active, .swipe-del:active { transform: scale(0.92); }
+  .swipe-edit { background: #E07A18; }
+  .swipe-del  { background: #D93025; }
+  .swipe-edit svg, .swipe-del svg { width: 20px; height: 20px; }
+  .swipe-edit span, .swipe-del span { font-size: 0.64rem; font-weight: 600; }
+  .trip-tile { height: 156px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .tt-name { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
+  .tt-country { font-size: 0.72rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
+  .tt-map { position: absolute; right: 12px; top: 42px; bottom: 46px; width: 52%; opacity: 0.85; pointer-events: none; }
+  .tt-map svg { width: 100%; height: 100%; display: block; }
+  .tt-cd { margin-top: auto; display: flex; align-items: baseline; gap: 5px; white-space: nowrap; position: relative; z-index: 1; }
   .tt-cd-val { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1; }
   .tt-cd-val.accent { color: var(--accent); }
   .tt-cd-val.green { color: var(--green); }
   .tt-cd-val.muted { color: var(--muted); }
   .tt-cd-unit { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
-  .tt-cd-label { font-size: 0.68rem; color: var(--muted-2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tt-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
-  .tt-meta { font-size: 0.66rem; color: var(--muted-2); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .tt-cd-label { font-size: 0.68rem; color: var(--muted-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
 
   .cat-pill { display: inline-block; font-size: 0.6rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; letter-spacing: 0.02em; white-space: nowrap; flex: 0 0 auto; }
   .pill-blue   { background: rgba(10,132,255,0.16);  color: #63b4ff; }
@@ -207,7 +219,7 @@
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 200; align-items: flex-end; justify-content: center; padding: 0; }
   .overlay.open { display: flex; }
   #dialog-overlay { z-index: 600; }
-  .modal { background: rgba(30, 30, 34, 0.72); -webkit-backdrop-filter: blur(48px) saturate(190%); backdrop-filter: blur(48px) saturate(190%); border: 1px solid var(--stroke-hi); border-bottom: none; border-radius: 34px 34px 0 0; box-shadow: 0 1.5px 1px rgba(255,255,255,0.12) inset, 0 -20px 60px rgba(0,0,0,0.4); padding: 26px 22px calc(26px + env(safe-area-inset-bottom)); width: 100%; max-width: 720px; max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: slideUp 0.45s var(--spring); }
+  .modal { background: rgba(30, 30, 34, 0.68); -webkit-backdrop-filter: blur(48px) saturate(190%); backdrop-filter: blur(48px) saturate(190%); border: 1px solid var(--stroke-hi); border-bottom: none; border-radius: 34px 34px 0 0; box-shadow: 0 1.5px 1px rgba(255,255,255,0.12) inset, 0 -20px 60px rgba(0,0,0,0.4); padding: 26px 22px calc(26px + env(safe-area-inset-bottom)); width: 100%; max-width: 720px; max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: slideUp 0.45s var(--spring); }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .grabber { width: 38px; height: 5px; border-radius: 99px; background: rgba(255,255,255,0.22); margin: -8px auto 18px; }
   .modal h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 20px; }
@@ -221,13 +233,14 @@
   .field input[type="date"]::-webkit-calendar-picker-indicator, .field input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); background: rgba(10,132,255,0.08); }
   .field select option { background: #1c1c1e; color: var(--text); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .f-toggle { display: flex; align-items: center; justify-content: flex-start; gap: 10px; min-height: 44px; }
   .f-toggle .f-toggle-lab { font-size: 0.78rem; color: var(--text); line-height: 1.2; display: inline; margin: 0; }
   .f-toggle .f-toggle-cb { width: 22px; height: 22px; accent-color: var(--accent); flex: 0 0 22px; cursor: pointer; margin: 0; }
 
   .modal-actions { display: flex; gap: 10px; margin-top: 22px; }
   .modal-actions-row { display: flex; gap: 10px; margin-top: 12px; }
-  .btn { flex: 1; padding: 14px; border-radius: 99px; font: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s, transform 0.3s var(--spring); }
+  .btn { flex: 1; padding: 14px; border-radius: 99px; font: inherit; font-size: 0.97rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s, transform 0.3s var(--spring); }
   .btn:active { transform: scale(0.96); opacity: 0.88; }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--stroke); }
@@ -463,8 +476,24 @@ async function migrateInlineImages(){
   if (changed) persist('activity');
 }
 
-/* ===== LÄNDERLISTE (für Länder-Auswahl der Reise) ===== */
-const COUNTRY_LIST = ["Ägypten","Argentinien","Australien","Bali","Belgien","Brasilien","Chile","China","Costa Rica","Dänemark","Deutschland","Dominikanische Republik","Fidschi","Finnland","Frankreich","Griechenland","Großbritannien","Hawaii","Indien","Indonesien","Irland","Island","Israel","Italien","Japan","Kanada","Kanaren","Katar","Kenia","Kolumbien","Kroatien","Kuba","Madeira","Malaysia","Malediven","Mallorca","Marokko","Mauritius","Mexiko","Namibia","Neuseeland","Niederlande","Norwegen","Österreich","Palau","Peru","Philippinen","Polen","Portugal","Schweden","Schweiz","Seychellen","Singapur","Spanien","Sri Lanka","Südafrika","Südkorea","Tansania","Thailand","Tschechien","Türkei","Ungarn","USA","VAE","Vietnam"];
+/* ===== WELTKARTE (Landmassen + Länder-Koordinaten aus Finanzen-Quelle) ===== */
+const WORLD_BASE_PATH = "M37.5,46.7L37.8,46.8L37.9,47.0L38.0,47.1L38.0,47.2L37.5,47.3L37.1,47.4L36.6,47.5L36.0,47.5L35.3,47.5L35.0,47.4L35.0,47.3L35.6,47.2L35.8,47.1L36.0,47.0L36.1,46.9L36.3,46.8L36.5,46.7L36.6,46.7L37.0,46.6L37.5,46.7ZM31.0,44.7L31.0,44.8L31.0,44.9L30.9,45.0L30.6,45.1L30.3,45.1L29.9,45.1L30.0,45.0L29.7,45.1L29.4,45.1L29.2,45.0L29.2,44.9L29.5,44.8L29.7,44.8L30.0,44.8L30.1,44.6L30.1,44.5L30.1,44.3L30.2,44.2L30.5,44.1L30.6,44.2L30.7,44.3L30.8,44.5L30.9,44.6L31.0,44.7ZM0.0,48.5L0.8,48.5L1.0,48.4L1.1,48.4L1.9,48.4L3.1,48.4L4.4,48.6L6.9,48.6L9.5,48.7L9.2,48.5L7.3,48.2L7.6,47.9L6.9,47.6L7.8,47.5L9.1,47.4L8.9,47.1L7.4,47.0L6.3,46.8L6.1,46.4L7.3,46.4L8.3,46.4L9.4,46.2L9.4,45.9L10.3,45.9L11.4,45.8L12.4,45.6L13.3,45.6L14.4,45.6L15.6,45.7L16.7,45.7L17.7,45.6L18.5,45.6L19.1,45.7L20.1,45.9L21.3,45.8L22.2,45.8L21.5,45.6L21.2,45.2L22.1,45.2L22.9,45.4L24.0,45.4L25.0,45.4L25.8,45.3L26.7,45.4L27.6,45.4L28.4,45.4L29.2,45.5L30.1,45.4L31.1,45.2L31.3,44.9L31.0,44.6L31.0,44.3L31.3,43.9L31.3,43.6L31.8,43.3L32.3,43.0L32.9,42.9L33.6,42.7L34.1,42.6L33.6,42.9L33.0,42.9L32.6,43.2L32.6,43.5L32.0,43.7L31.9,44.0L32.4,44.2L32.7,44.6L33.0,45.0L33.1,45.3L32.8,45.7L32.1,45.9L31.0,46.1L29.9,46.3L28.5,46.3L29.4,46.5L28.8,46.7L28.3,47.0L29.1,47.3L30.6,47.5L32.4,47.7L33.7,48.0L34.6,47.9L36.2,47.7L38.1,47.8L39.4,47.6L41.0,47.4L41.9,47.2L41.2,47.0L40.0,47.0L40.6,46.6L41.7,46.4L42.7,46.2L43.8,46.1L44.7,46.0L45.6,45.7L45.5,45.4L46.3,45.2L46.9,44.9L47.6,44.9L48.1,44.7L48.8,44.9L49.8,44.8L50.5,44.8L51.4,44.6L52.2,44.4L52.8,44.6L53.4,44.5L54.2,44.6L55.1,44.4L56.0,44.5L56.6,44.6L57.5,44.6L58.3,44.4L59.1,44.3L59.7,44.1L60.3,44.2L61.0,44.3L61.7,44.1L62.5,43.9L63.2,43.8L63.9,43.6L64.4,43.4L65.1,43.3L65.9,43.4L66.3,43.7L67.1,43.9L67.8,43.7L68.6,43.8L69.4,44.2L69.1,44.4L69.2,44.6L68.9,45.0L69.7,45.0L70.1,44.7L70.5,44.4L71.3,44.3L71.8,44.1L72.5,43.9L73.0,43.7L73.8,43.6L74.4,43.4L74.9,43.7L75.7,43.7L76.4,43.7L77.2,43.7L77.9,43.6L78.6,43.2L79.1,43.4L80.0,43.6L80.8,43.5L81.6,43.3L82.1,43.5L82.9,43.7L83.8,43.6L84.5,43.5L85.3,43.5L86.0,43.5L86.9,43.4L87.5,43.3L87.7,43.3L88.2,43.6L89.1,43.6L90.1,43.6L90.6,43.8L91.3,44.0L92.4,44.1L93.1,44.1L93.9,44.3L94.7,44.5L95.5,44.6L96.5,44.7L97.4,44.8L97.4,45.1L97.0,45.5L96.1,45.7L95.6,46.0L95.4,46.3L95.6,46.6L96.4,46.9L94.9,47.0L94.5,47.4L94.9,47.7L95.9,48.0L97.1,48.3L98.1,48.4ZM31.2,40.0L31.5,40.1L31.9,40.2L31.8,40.3L31.5,40.3L31.4,40.2L31.3,40.4L31.1,40.4L30.8,40.4L30.6,40.3L30.3,40.3L29.9,40.1L29.6,40.0L29.3,39.7L29.5,39.7L29.9,39.9L30.2,40.0L30.4,39.9L30.5,39.7L30.7,39.6L30.9,39.6L31.0,39.8L31.2,40.0ZM98.1,36.4L98.1,36.5L98.3,36.4L98.4,36.5L98.4,36.6L98.3,36.7L98.1,36.9L98.0,37.0L98.1,37.2L97.9,37.2L97.6,37.3L97.6,37.5L97.4,37.8L97.2,37.9L97.0,38.0L96.8,37.9L96.6,37.9L96.3,37.8L96.3,37.7L96.4,37.5L96.8,37.3L96.9,37.2L97.1,37.1L97.4,37.0L97.5,36.8L97.7,36.6L97.8,36.5L97.8,36.4L98.0,36.2L98.1,36.4ZM98.5,35.0L98.7,35.3L98.7,35.1L98.8,35.2L98.9,35.4L99.1,35.5L99.3,35.5L99.4,35.4L99.6,35.5L99.5,35.7L99.4,35.9L99.2,35.9L99.1,36.0L99.2,36.1L99.1,36.1L99.0,36.3L98.9,36.5L98.7,36.6L98.6,36.5L98.5,36.5L98.7,36.2L98.6,36.1L98.3,36.0L98.3,35.9L98.5,35.8L98.5,35.6L98.5,35.4L98.4,35.2L98.4,35.1L98.3,35.0L98.1,34.8L98.0,34.6L98.1,34.6L98.2,34.7L98.4,34.8L98.5,35.0ZM63.9,28.8L63.9,29.1L64.0,29.2L64.0,29.4L63.9,29.4L63.9,29.3L63.8,29.4L63.9,29.6L63.8,29.7L63.7,29.8L63.7,30.0L63.6,30.3L63.5,30.7L63.3,31.2L63.2,31.6L63.1,31.9L62.9,32.0L62.6,32.1L62.5,32.0L62.2,31.9L62.2,31.8L62.1,31.5L62.0,31.3L62.0,31.1L62.1,30.9L62.2,30.9L62.2,30.8L62.3,30.6L62.4,30.4L62.3,30.3L62.2,30.1L62.2,29.8L62.3,29.7L62.3,29.5L62.5,29.5L62.6,29.4L62.7,29.4L62.9,29.4L63.0,29.2L63.3,29.1L63.3,28.9L63.3,28.8L63.4,28.8L63.6,28.6L63.6,28.5L63.7,28.3L63.8,28.5L63.8,28.6L63.9,28.8ZM89.9,28.8L90.0,29.0L90.2,28.9L90.2,29.1L90.4,29.2L90.4,29.3L90.4,29.5L90.5,29.7L90.5,29.7L90.6,29.9L90.6,30.1L90.7,30.3L91.0,30.4L91.2,30.5L91.3,30.7L91.3,30.7L91.5,30.9L91.6,31.2L91.7,31.1L91.8,31.3L91.9,31.2L91.9,31.5L92.1,31.7L92.2,31.8L92.5,32.0L92.5,32.2L92.5,32.4L92.5,32.6L92.7,32.8L92.6,33.1L92.6,33.2L92.5,33.4L92.5,33.6L92.5,33.8L92.3,34.0L92.1,34.2L92.0,34.4L91.9,34.5L91.9,34.8L91.8,34.9L91.7,35.1L91.7,35.3L91.7,35.4L91.5,35.5L91.2,35.5L90.9,35.6L90.8,35.7L90.6,35.8L90.4,35.7L90.2,35.7L90.3,35.5L90.1,35.6L89.9,35.8L89.7,35.7L89.5,35.7L89.3,35.6L89.1,35.6L88.9,35.4L88.8,35.2L88.8,35.0L88.6,34.9L88.4,34.9L88.5,34.8L88.4,34.6L88.3,34.7L88.0,34.8L88.2,34.6L88.2,34.5L88.3,34.3L88.3,34.1L88.1,34.4L87.9,34.5L87.8,34.7L87.6,34.6L87.6,34.4L87.4,34.2L87.2,34.1L87.3,34.1L86.9,33.9L86.7,33.9L86.5,33.7L86.0,33.8L85.6,33.9L85.3,34.0L85.0,33.9L84.7,34.1L84.5,34.2L84.5,34.3L84.3,34.4L84.1,34.4L83.9,34.4L83.7,34.4L83.5,34.4L83.3,34.4L83.1,34.6L83.1,34.6L82.9,34.7L82.8,34.7L82.6,34.7L82.4,34.7L82.1,34.6L82.0,34.5L82.0,34.3L82.1,34.3L82.1,34.2L82.1,34.1L82.2,33.9L82.1,33.8L82.0,33.5L81.9,33.3L82.0,33.2L81.8,33.0L81.8,32.9L81.7,32.8L81.7,32.6L81.5,32.4L81.5,32.3L81.6,32.4L81.5,32.1L81.6,32.2L81.7,32.3L81.7,32.2L81.6,31.9L81.6,31.9L81.5,31.8L81.5,31.6L81.6,31.5L81.6,31.4L81.6,31.2L81.7,31.0L81.7,31.3L81.8,31.1L82.1,31.0L82.2,30.9L82.4,30.8L82.5,30.7L82.6,30.8L82.8,30.7L83.0,30.6L83.1,30.6L83.1,30.5L83.3,30.5L83.6,30.5L83.7,30.3L83.8,30.2L84.0,30.1L84.0,29.9L84.0,29.8L84.2,29.6L84.3,29.8L84.4,29.7L84.3,29.6L84.4,29.5L84.5,29.5L84.5,29.3L84.7,29.2L84.8,29.1L84.9,29.0L84.9,29.0L85.0,29.0L85.0,28.9L85.2,28.9L85.3,28.8L85.5,29.0L85.7,29.1L85.8,29.1L86.0,29.2L85.9,29.0L86.1,28.8L86.2,28.7L86.2,28.6L86.3,28.5L86.5,28.4L86.6,28.4L86.8,28.4L86.8,28.2L86.6,28.1L86.8,28.1L86.9,28.2L87.1,28.3L87.3,28.3L87.4,28.3L87.6,28.4L87.7,28.3L87.8,28.3L87.9,28.3L88.0,28.4L88.0,28.6L87.9,28.7L87.8,28.7L87.8,28.8L87.7,29.0L87.6,29.1L87.6,29.2L87.9,29.3L88.1,29.4L88.2,29.5L88.4,29.7L88.5,29.7L88.6,29.7L88.7,29.8L88.9,29.9L89.1,29.8L89.2,29.7L89.2,29.6L89.3,29.4L89.4,29.2L89.3,29.0L89.3,29.0L89.3,28.8L89.3,28.6L89.4,28.5L89.4,28.4L89.4,28.3L89.5,28.1L89.5,28.1L89.6,28.0L89.7,28.1L89.7,28.3L89.8,28.3L89.8,28.4L89.9,28.6L89.9,28.7L89.9,28.8ZM80.2,26.9L80.7,26.9L80.8,26.8L81.3,26.9L81.4,27.1L81.8,27.2L82.1,27.3L81.8,27.4L81.5,27.3L81.3,27.3L81.0,27.3L80.7,27.3L80.4,27.2L80.2,27.1L80.1,27.2L79.6,27.0L79.5,26.9L79.3,26.9L79.5,26.6L79.8,26.7L80.0,26.8L80.1,26.8L80.2,26.9ZM87.3,25.3L87.3,25.8L87.6,25.9L87.9,25.6L88.2,25.5L88.4,25.5L88.7,25.6L88.9,25.7L89.2,25.7L89.6,25.9L90.2,26.1L90.4,26.2L90.5,26.4L90.6,26.5L91.0,26.7L91.1,26.8L90.8,26.9L90.9,27.1L91.1,27.2L91.3,27.5L91.5,27.5L91.5,27.6L91.7,27.7L91.6,27.7L91.9,27.9L91.9,27.9L91.7,28.0L91.6,27.9L91.4,27.9L91.1,27.8L90.9,27.6L90.7,27.5L90.6,27.2L90.2,27.1L90.0,27.2L89.8,27.3L89.8,27.5L89.6,27.6L89.5,27.5L89.2,27.5L88.9,27.3L88.6,27.2L88.6,27.3L88.2,27.3L88.3,27.1L88.5,27.0L88.4,26.7L88.3,26.5L87.8,26.3L87.5,26.2L87.1,26.0L87.0,26.1L86.9,26.1L86.9,26.0L86.9,25.9L86.7,25.8L87.0,25.7L87.2,25.7L87.1,25.6L86.7,25.6L86.6,25.4L86.4,25.4L86.3,25.3L86.6,25.2L86.8,25.1L87.2,25.2L87.3,25.3ZM84.8,24.6L84.6,24.9L84.4,24.9L84.1,24.9L83.6,24.9L83.4,24.9L83.3,25.1L83.6,25.4L83.7,25.3L84.3,25.2L84.2,25.3L84.1,25.3L84.0,25.4L83.8,25.5L84.0,25.9L84.0,26.0L84.2,26.3L84.2,26.5L84.1,26.6L84.0,26.5L84.1,26.2L83.8,26.3L83.7,26.3L83.8,26.2L83.6,26.0L83.6,25.7L83.4,25.8L83.4,26.1L83.5,26.5L83.3,26.6L83.2,26.5L83.2,26.2L83.2,26.0L83.1,26.0L83.0,25.8L83.1,25.6L83.1,25.4L83.3,25.0L83.3,24.8L83.6,24.6L83.8,24.7L84.1,24.8L84.5,24.7L84.7,24.5L84.8,24.6ZM79.4,26.6L79.1,26.6L78.9,26.4L78.5,26.2L78.4,26.0L78.2,25.8L78.0,25.6L77.8,25.2L77.6,24.9L77.5,24.7L77.4,24.5L77.1,24.3L77.0,24.1L76.8,23.9L76.5,23.6L76.5,23.5L76.6,23.5L77.1,23.5L77.3,23.8L77.5,24.0L77.7,24.1L78.0,24.4L78.2,24.4L78.5,24.6L78.6,24.8L78.8,25.0L78.7,25.2L78.9,25.3L79.0,25.3L79.0,25.5L79.1,25.7L79.3,25.7L79.5,25.9L79.4,26.2L79.4,26.6ZM82.7,24.5L83.1,24.7L82.7,24.8L82.6,25.0L82.6,25.2L82.4,25.4L82.4,25.7L82.3,26.1L82.2,26.0L81.9,26.1L81.8,26.0L81.6,26.0L81.5,25.9L81.1,26.0L81.0,25.8L80.8,25.8L80.6,25.8L80.6,25.4L80.4,25.4L80.3,25.1L80.3,24.9L80.3,24.6L80.5,24.4L80.7,24.5L80.9,24.5L80.9,24.3L81.1,24.2L81.4,24.1L81.6,23.9L81.7,23.7L81.8,23.6L82.1,23.5L82.3,23.3L82.4,23.1L82.5,23.1L82.7,23.2L82.7,23.3L82.9,23.4L83.1,23.5L83.1,23.6L82.9,23.6L82.9,23.8L82.7,23.9L82.6,24.1L82.8,24.4L82.7,24.5ZM83.7,19.9L83.9,19.9L84.0,19.9L84.0,19.9L83.9,20.1L84.0,20.3L84.0,20.5L83.8,20.6L83.8,20.8L83.8,21.0L84.0,21.1L84.1,21.0L84.4,21.2L84.4,21.3L84.5,21.4L84.5,21.5L84.2,21.4L84.1,21.2L84.1,21.3L83.9,21.2L83.6,21.2L83.5,21.2L83.5,21.0L83.6,21.0L83.5,20.9L83.5,21.0L83.4,20.8L83.3,20.7L83.3,20.5L83.4,20.5L83.4,20.1L83.5,19.9L83.7,19.9ZM27.9,18.7L28.0,18.8L28.2,18.7L28.3,18.8L28.6,19.0L28.7,19.1L28.8,19.1L29.0,19.2L29.0,19.2L29.2,19.3L29.4,19.4L29.4,19.4L29.2,19.5L29.0,19.5L28.8,19.5L28.4,19.5L28.6,19.3L28.5,19.3L28.3,19.2L28.2,19.2L28.1,19.0L28.0,19.0L27.7,18.9L27.6,18.9L27.3,18.8L27.2,18.8L27.3,18.7L27.0,18.7L26.8,18.8L26.7,18.8L26.7,18.9L26.5,18.9L26.4,18.9L26.5,18.8L26.6,18.7L26.7,18.7L26.9,18.6L27.1,18.6L27.1,18.6L27.4,18.6L27.6,18.6L27.9,18.7ZM89.2,14.7L89.1,14.9L89.1,15.0L89.0,15.2L88.6,15.4L88.1,15.4L87.7,15.7L87.5,15.6L87.5,15.4L87.0,15.5L86.7,15.6L86.4,15.6L86.7,15.8L86.5,16.3L86.3,16.4L86.2,16.3L86.2,16.0L86.1,15.9L85.9,15.8L86.2,15.7L86.4,15.5L86.6,15.3L86.8,15.2L87.4,15.1L87.7,15.1L88.0,14.6L88.2,14.8L88.6,14.5L88.7,14.4L88.9,14.0L88.9,13.7L89.0,13.6L89.3,13.5L89.4,13.9L89.4,14.1L89.2,14.4L89.2,14.7ZM90.0,12.7L90.2,12.8L90.4,12.7L90.4,13.0L90.0,13.1L89.8,13.3L89.3,13.1L89.2,13.4L88.9,13.5L88.8,13.2L89.0,13.0L89.3,12.9L89.4,12.6L89.4,12.3L89.8,12.6L90.0,12.7ZM34.4,10.9L34.2,11.2L34.4,11.1L34.6,11.1L34.5,11.2L34.7,11.3L34.9,11.2L35.1,11.3L35.1,11.5L35.3,11.5L35.3,11.6L35.4,11.8L35.3,12.0L35.1,12.1L35.0,12.0L35.0,11.8L34.9,11.7L34.6,12.0L34.4,12.0L34.6,11.8L34.4,11.8L34.1,11.8L33.5,11.8L33.5,11.7L33.7,11.6L33.5,11.5L33.8,11.4L34.1,10.9L34.2,10.8L34.5,10.7L34.6,10.7L34.6,10.7L34.4,10.9ZM89.9,10.9L90.2,11.4L89.8,11.3L89.6,11.7L89.9,12.0L89.9,12.2L89.7,12.0L89.5,12.2L89.4,12.0L89.4,11.7L89.4,11.4L89.5,11.2L89.5,10.8L89.3,10.6L89.4,10.2L89.6,10.1L89.5,9.9L89.6,9.9L89.7,10.1L89.8,10.3L89.8,10.6L89.9,10.9ZM49.2,8.7L48.9,9.0L49.2,9.0L49.5,9.0L49.4,9.2L49.1,9.5L49.4,9.5L49.7,9.8L49.9,9.9L50.1,10.2L50.1,10.3L50.5,10.4L50.4,10.5L50.3,10.6L50.4,10.8L50.2,10.9L49.8,10.9L49.3,11.0L49.2,10.9L49.0,11.0L48.7,11.0L48.5,11.1L48.4,11.1L48.8,10.8L49.1,10.7L48.6,10.7L48.5,10.6L48.8,10.5L48.7,10.3L48.7,10.1L49.1,10.2L49.2,10.0L49.0,9.8L48.7,9.8L48.6,9.7L48.7,9.6L48.6,9.5L48.4,9.6L48.4,9.4L48.3,9.2L48.4,8.9L48.6,8.7L48.8,8.7L49.2,8.7ZM46.0,6.5L45.9,6.7L46.2,6.9L45.9,7.1L45.1,7.3L44.8,7.4L44.5,7.3L43.7,7.2L44.0,7.1L43.3,7.0L43.8,6.9L43.8,6.8L43.2,6.8L43.4,6.6L43.9,6.6L44.3,6.7L44.7,6.6L45.1,6.7L45.5,6.5L46.0,6.5ZM0.0,5.8L2.1,6.8L0.3,6.7ZM99.7,7.4L97.3,8.4L95.3,9.0L93.6,10.8L95.0,8.2L93.1,8.6L87.5,9.8L89.0,11.1L86.7,13.0L85.7,13.8L86.0,15.1L85.0,14.5L84.8,14.2L83.7,14.0L83.0,14.5L83.2,15.1L83.9,16.7L81.9,18.7L80.5,19.1L80.2,20.8L79.0,22.1L77.6,22.0L78.4,23.3L79.0,24.6L77.8,23.2L77.3,22.0L76.5,20.6L75.6,19.1L74.8,18.9L73.1,20.1L72.2,21.7L71.1,22.1L70.2,19.3L68.7,18.1L65.7,17.5L63.6,16.6L63.9,17.6L64.2,17.7L65.0,18.3L65.8,18.3L66.5,19.0L65.7,19.8L64.8,20.4L63.2,21.2L62.1,21.5L61.9,20.5L60.9,19.1L60.2,17.8L59.6,16.9L59.3,17.3L60.3,19.2L61.4,21.0L62.1,21.9L63.6,21.8L64.1,22.1L62.0,24.9L61.0,26.2L61.0,27.5L61.1,29.5L59.8,30.9L59.5,31.9L58.8,33.1L57.2,34.4L55.6,34.7L55.1,34.0L54.1,32.1L53.3,29.8L53.8,28.1L53.4,26.7L52.5,25.1L52.4,23.8L51.0,23.3L48.9,23.6L47.0,23.3L46.0,22.2L45.4,21.6L45.4,20.4L45.3,18.9L46.0,17.7L47.4,16.1L49.0,15.2L51.5,14.8L53.1,14.7L53.2,15.8L55.4,16.5L56.6,16.1L58.6,16.2L59.7,16.1L59.9,14.9L58.2,15.0L58.1,13.6L61.5,13.5L60.4,12.4L59.7,12.1L59.0,12.4L58.2,12.5L58.0,13.6L56.8,13.9L56.7,14.4L55.9,14.4L55.4,13.4L54.3,12.7L53.7,12.3L54.5,13.4L54.6,13.9L54.4,14.0L52.9,13.1L50.9,13.0L49.9,14.4L48.3,14.9L47.4,14.2L47.4,13.0L49.4,11.9L50.5,10.8L52.3,10.1L52.7,9.0L52.8,9.7L54.5,9.9L56.0,9.1L56.8,8.5L56.2,8.2L56.6,6.7L55.0,8.6L53.1,8.7L52.9,7.1L57.8,5.2L61.4,6.4L60.3,7.1L62.4,6.5L63.3,6.4L66.3,5.9L68.9,5.8L70.2,4.8L70.1,6.6L70.7,5.4L71.5,4.9L74.2,4.1L78.1,3.6L81.5,3.8L81.5,4.6L85.7,4.7L88.4,5.1L94.4,5.4L97.2,5.7ZM24.8,5.7L26.0,6.1L27.4,5.9L26.2,6.5L24.8,7.3L23.7,8.6L25.5,9.3L27.1,9.9L28.0,10.0L28.5,8.9L29.0,7.7L30.7,8.0L31.9,8.4L33.2,9.5L34.5,10.2L32.9,11.1L30.6,11.7L32.2,11.5L33.2,11.9L31.8,12.9L31.4,12.6L30.3,13.2L30.4,13.5L29.9,13.6L29.5,13.8L29.1,14.2L29.0,14.5L28.8,14.5L28.5,15.4L27.5,16.1L27.6,17.2L27.5,18.0L27.0,17.1L26.2,16.6L25.2,16.7L24.8,16.9L23.4,17.0L23.0,17.8L22.8,18.8L23.4,19.8L24.6,19.8L25.4,19.0L25.7,19.5L25.5,19.9L25.5,20.3L25.4,20.6L25.7,20.6L26.3,20.6L26.7,20.7L26.8,21.1L26.7,21.7L26.9,22.2L27.4,22.6L28.0,22.4L28.9,22.4L29.4,21.9L30.2,21.6L30.0,22.3L30.5,21.8L31.1,22.1L32.1,22.0L33.1,22.4L33.8,23.1L34.7,23.3L35.7,23.8L36.0,25.0L37.7,25.6L39.7,26.3L40.2,27.5L39.2,28.8L38.7,30.8L37.4,31.6L36.5,32.8L35.4,34.2L34.1,34.6L34.2,35.1L32.7,36.0L31.9,36.4L31.9,37.1L31.5,38.1L30.8,39.1L30.3,39.7L29.1,39.3L29.0,38.0L29.5,37.0L29.6,35.3L30.2,33.4L30.5,30.5L28.9,29.1L27.9,27.2L27.5,26.1L27.6,25.5L27.9,24.7L28.4,24.3L28.5,23.4L28.2,22.7L27.7,22.7L27.5,22.8L27.0,22.7L26.8,22.5L26.4,22.3L26.2,22.0L25.8,21.5L25.6,21.3L25.0,21.2L23.9,20.6L22.8,20.5L21.5,20.0L20.7,19.3L20.5,18.7L19.6,17.7L18.8,17.0L18.3,16.2L18.4,16.9L18.8,17.4L19.3,18.3L19.4,18.7L18.8,17.8L18.0,17.3L17.9,16.8L17.2,15.7L16.5,15.4L15.6,14.2L15.5,12.9L15.8,11.7L15.3,11.1L14.1,10.1L12.9,9.1L10.9,8.4L8.9,8.3L7.9,8.1L7.4,8.6L6.0,9.4L4.2,9.9L5.5,9.3L6.1,8.7L5.2,8.7L4.3,8.3L4.3,7.5L5.3,7.2L4.6,7.1L4.3,6.5L4.3,6.2L4.7,5.6L6.9,5.2L8.4,5.4L10.8,5.6L13.1,5.7L14.6,5.5L16.3,5.6L18.0,6.1L19.8,6.0L21.3,6.1L23.3,6.0L23.2,5.5L24.3,5.6ZM18.3,4.7L18.1,4.8L18.8,4.7L19.2,4.9L19.5,4.7L19.7,4.8L19.9,5.1L20.1,5.0L19.9,4.7L20.1,4.7L20.4,4.7L20.7,4.8L20.9,5.1L21.0,5.3L21.4,5.4L22.0,5.5L21.9,5.7L21.5,5.7L21.6,5.8L21.5,5.9L21.0,5.9L20.6,5.8L20.2,5.8L19.7,5.9L18.9,5.9L18.5,6.0L18.4,5.8L18.0,5.8L17.7,5.8L17.4,5.6L17.6,5.5L18.0,5.5L18.4,5.5L18.8,5.5L18.2,5.4L17.6,5.4L17.2,5.4L17.1,5.3L17.7,5.2L17.3,5.2L16.8,5.1L17.1,4.9L17.3,4.8L18.0,4.6L18.3,4.7ZM26.0,4.7L26.2,4.9L26.4,4.6L27.1,4.5L27.6,4.8L27.6,5.0L28.1,4.9L28.4,4.8L29.0,4.9L29.4,5.1L29.4,5.2L29.9,5.1L30.2,5.3L30.9,5.4L31.1,5.5L31.4,5.8L30.9,5.9L31.5,6.1L32.0,6.2L32.4,6.4L32.8,6.4L32.7,6.6L32.2,6.9L31.9,6.8L31.5,6.6L31.1,6.6L31.1,6.8L31.4,6.9L31.7,7.0L31.9,7.1L32.0,7.4L31.9,7.6L31.6,7.5L30.9,7.3L31.3,7.5L31.6,7.7L31.6,7.8L30.9,7.7L30.3,7.5L29.9,7.4L30.0,7.3L29.6,7.2L29.2,7.0L29.2,7.1L28.4,7.2L28.2,7.1L28.4,6.9L28.9,6.9L29.5,6.8L29.4,6.7L29.5,6.6L29.8,6.3L29.7,6.2L29.6,6.1L29.2,6.0L28.6,5.9L28.8,5.8L28.5,5.6L28.3,5.6L28.1,5.5L27.9,5.6L27.4,5.6L26.4,5.6L25.8,5.5L25.4,5.4L25.1,5.3L25.4,5.2L25.0,5.2L24.9,4.9L25.2,4.7L25.4,4.6L26.2,4.5L26.0,4.7ZM16.5,5.2L15.8,5.3L15.7,5.2L15.0,5.0L15.1,4.9L15.3,4.7L15.6,4.5L15.3,4.4L16.2,4.3L16.6,4.4L17.3,4.4L17.6,4.5L17.9,4.6L17.6,4.7L16.9,4.9L16.5,5.1L16.5,5.2ZM19.9,3.8L20.1,3.9L20.3,3.9L20.6,3.9L20.6,4.0L20.5,4.2L19.5,4.2L18.8,4.3L18.4,4.3L18.4,4.2L18.9,4.1L17.7,4.2L17.3,4.1L17.7,3.8L17.9,3.8L18.7,3.8L19.2,4.0L19.7,4.0L19.3,3.8L19.6,3.7L19.8,3.7L19.9,3.8ZM66.0,5.4L65.8,5.4L64.9,5.3L64.8,5.2L64.3,5.1L64.3,5.0L64.6,4.9L64.6,4.8L65.1,4.5L64.9,4.5L65.5,4.3L65.5,4.1L66.1,4.0L67.0,3.8L67.9,3.8L68.4,3.7L68.9,3.6L69.1,3.7L68.9,3.8L68.0,4.0L67.1,4.1L66.2,4.4L65.8,4.6L65.4,4.9L65.5,5.1L66.0,5.4ZM23.7,3.6L24.0,3.7L24.6,3.7L24.8,3.8L24.7,3.9L25.0,3.9L25.2,4.0L25.6,4.0L26.0,4.0L26.4,4.0L27.0,3.9L27.5,4.0L27.8,4.1L27.8,4.2L27.7,4.3L27.2,4.3L26.9,4.3L26.1,4.3L25.5,4.3L25.1,4.3L24.3,4.2L24.2,4.1L24.2,3.9L23.9,3.8L23.3,3.8L23.0,3.7L23.1,3.6L23.7,3.6ZM55.1,2.9L56.0,3.1L55.3,3.2L55.1,3.4L54.9,3.4L54.8,3.7L54.4,3.7L53.8,3.5L54.1,3.4L53.7,3.3L53.1,3.1L52.9,2.9L53.7,2.8L53.8,2.9L54.2,2.9L54.3,2.8L54.7,2.8L55.1,2.9ZM77.8,3.1L77.2,3.1L76.4,3.0L75.9,2.9L75.7,2.7L75.3,2.7L76.0,2.5L76.6,2.4L77.2,2.6L77.8,2.8L77.8,3.1ZM25.8,2.9L26.2,3.0L25.8,3.0L25.3,3.3L24.8,3.3L24.2,3.2L23.9,3.1L23.9,3.0L24.1,3.0L23.6,3.0L23.3,2.9L23.1,2.7L23.3,2.6L23.5,2.5L23.8,2.5L23.7,2.4L24.3,2.4L24.7,2.6L25.2,2.6L25.6,2.7L25.8,2.9ZM31.0,1.9L31.7,1.9L32.3,2.0L32.8,2.0L32.8,2.1L32.1,2.2L31.5,2.3L31.2,2.4L31.8,2.4L31.2,2.5L30.7,2.6L30.2,2.8L29.7,2.9L29.5,2.9L28.6,3.0L29.0,3.0L28.8,3.1L29.1,3.2L28.8,3.3L28.4,3.4L28.2,3.5L27.8,3.6L27.9,3.6L28.4,3.6L28.4,3.7L27.6,3.8L26.9,3.8L26.1,3.8L25.7,3.8L25.1,3.8L25.1,3.6L25.6,3.6L25.5,3.4L25.7,3.3L26.4,3.5L26.0,3.3L25.6,3.2L25.8,3.1L26.3,3.1L26.4,3.0L26.0,2.9L25.9,2.7L26.6,2.7L26.8,2.8L27.3,2.6L26.6,2.6L25.7,2.6L25.2,2.5L24.9,2.4L24.6,2.3L24.6,2.3L25.0,2.2L25.3,2.2L25.8,2.1L26.3,2.0L26.6,2.1L26.9,2.1L27.1,2.0L27.5,1.9L28.0,1.9L28.8,1.9L29.0,1.9L29.8,1.9L30.4,1.9L31.0,1.9ZM42.5,1.8L44.2,2.0L43.7,2.1L42.6,2.1L41.1,2.2L41.3,2.2L42.3,2.2L43.1,2.3L43.6,2.2L43.9,2.3L43.6,2.5L44.3,2.4L45.6,2.2L46.5,2.3L46.6,2.4L45.5,2.6L45.3,2.7L44.4,2.7L45.1,2.7L44.8,2.9L44.5,3.1L44.5,3.4L44.9,3.6L44.4,3.6L44.0,3.7L44.5,3.9L44.6,4.1L44.3,4.1L44.6,4.4L44.0,4.4L44.3,4.5L44.2,4.6L43.8,4.6L43.5,4.6L43.8,4.8L43.8,4.9L43.3,4.8L43.1,4.9L43.5,5.0L43.9,5.1L44.0,5.4L43.5,5.4L43.2,5.3L42.9,5.2L43.0,5.3L42.7,5.5L43.4,5.5L43.8,5.5L43.0,5.8L42.3,6.0L41.5,6.1L41.2,6.1L40.9,6.2L40.5,6.5L39.9,6.7L39.7,6.7L39.3,6.8L38.9,6.8L38.7,7.0L38.7,7.2L38.6,7.4L38.1,7.6L38.2,7.8L38.1,8.0L38.0,8.3L37.6,8.3L37.1,8.1L36.6,8.1L36.3,7.9L36.1,7.7L35.7,7.3L35.5,7.1L35.5,6.9L35.1,6.6L35.2,6.4L35.0,6.3L35.3,6.0L35.7,5.9L35.8,5.8L35.9,5.6L35.6,5.7L35.4,5.7L35.2,5.8L34.8,5.7L34.8,5.5L34.9,5.3L35.2,5.3L35.7,5.4L35.2,5.2L35.0,5.1L34.7,5.2L34.5,5.1L34.8,4.8L34.6,4.7L34.4,4.5L34.1,4.2L33.7,4.1L33.7,4.0L33.0,3.9L32.4,3.8L31.6,3.9L31.0,3.9L30.6,3.8L30.2,3.6L30.9,3.5L31.5,3.5L30.3,3.4L29.6,3.3L29.7,3.2L30.7,3.1L31.7,2.9L31.9,2.8L31.1,2.7L31.3,2.6L32.3,2.4L32.7,2.4L32.6,2.3L33.3,2.2L34.1,2.2L35.0,2.2L35.3,2.3L36.0,2.1L36.7,2.2L37.1,2.2L37.6,2.3L37.0,2.2L37.0,2.0L37.9,1.9L38.9,1.9L39.3,1.8L40.3,1.8L42.5,1.8Z";
+const COUNTRY_COORDS = {"Deutschland":[52.6,10.6],"Österreich":[53.9,11.9],"Schweiz":[52.3,11.9],"Italien":[53.5,13.3],"Frankreich":[50.6,11.9],"Spanien":[48.9,13.9],"Portugal":[47.8,14.1],"Griechenland":[56.1,14.2],"Kroatien":[54.4,12.5],"Niederlande":[51.5,10.5],"Belgien":[51.2,11.1],"Dänemark":[52.8,9.6],"Norwegen":[52.4,7.9],"Schweden":[55,8.1],"Finnland":[57.2,7.3],"Island":[45,7.1],"Irland":[47.8,10.2],"Großbritannien":[49.4,9.7],"Polen":[55.3,10.6],"Tschechien":[54.3,11.3],"Ungarn":[55.4,11.9],"Türkei":[59.7,14.1],"USA":[23.3,14.4],"Kanada":[20.4,9.4],"Mexiko":[22.2,18.6],"Costa Rica":[26.7,22.2],"Kuba":[27.8,18.9],"Dominikanische Republik":[30.4,19.8],"Brasilien":[35.3,28.9],"Argentinien":[32.2,34.7],"Chile":[30.3,33.9],"Peru":[28.9,27.5],"Kolumbien":[29.4,23.9],"Namibia":[54.7,31.1],"Südafrika":[57.1,33.3],"Kenia":[60.6,25.1],"Tansania":[59.7,26.7],"Marokko":[48.6,16.1],"Ägypten":[58.3,17.5],"Mauritius":[65.9,30.6],"Seychellen":[65.3,26.3],"Thailand":[77.9,20.8],"Vietnam":[79.6,20.6],"Indonesien":[82.9,26.4],"Malaysia":[80.3,23.9],"Singapur":[78.9,24.6],"Japan":[88.3,15],"Südkorea":[85.6,15.1],"China":[79.2,15],"Indien":[71.9,19.2],"Sri Lanka":[72.4,22.8],"Malediven":[70.3,24],"VAE":[65.1,18.1],"Katar":[64.3,17.9],"Israel":[59.7,16.2],"Australien":[87.1,32.4],"Neuseeland":[97.4,36.6],"Fidschi":[99.6,29.7],"Palau":[87.2,23],"Philippinen":[83.6,21.6],"Bali":[82.6,27.4],"Hawaii":[6.1,19.4],"Kanaren":[45.6,17.1],"Madeira":[45.3,16],"Mallorca":[50.8,14.1]};
+const CONTINENT_BOX = {"europa":[42,6.5,20,11],"afrika":[43,14,26,23],"nordamerika":[13,6,23,20],"suedamerika":[25,21,17,20],"asien":[57,9,36,21],"ozeanien":[83,26,17,14]};
+const COUNTRY_CONTINENT = {"Deutschland":"europa","Österreich":"europa","Schweiz":"europa","Italien":"europa","Frankreich":"europa","Spanien":"europa","Portugal":"europa","Griechenland":"europa","Kroatien":"europa","Niederlande":"europa","Belgien":"europa","Dänemark":"europa","Norwegen":"europa","Schweden":"europa","Finnland":"europa","Island":"europa","Irland":"europa","Großbritannien":"europa","Polen":"europa","Tschechien":"europa","Ungarn":"europa","Mallorca":"europa","Türkei":"europa","Namibia":"afrika","Südafrika":"afrika","Kenia":"afrika","Tansania":"afrika","Marokko":"afrika","Ägypten":"afrika","Kanaren":"afrika","Madeira":"afrika","Mauritius":"afrika","Seychellen":"afrika","USA":"nordamerika","Kanada":"nordamerika","Mexiko":"nordamerika","Kuba":"nordamerika","Costa Rica":"nordamerika","Dominikanische Republik":"nordamerika","Brasilien":"suedamerika","Argentinien":"suedamerika","Chile":"suedamerika","Peru":"suedamerika","Kolumbien":"suedamerika","Thailand":"asien","Vietnam":"asien","Indonesien":"asien","Malaysia":"asien","Singapur":"asien","Japan":"asien","Südkorea":"asien","China":"asien","Indien":"asien","Sri Lanka":"asien","Malediven":"asien","VAE":"asien","Katar":"asien","Israel":"asien","Palau":"asien","Philippinen":"asien","Bali":"asien","Australien":"ozeanien","Neuseeland":"ozeanien","Fidschi":"ozeanien"};
+function mapForCountry(country){
+  const co = COUNTRY_COORDS[country]; if(!co) return null;
+  const cont = COUNTRY_CONTINENT[country];
+  let box;
+  if(cont && CONTINENT_BOX[cont]) box = CONTINENT_BOX[cont];
+  else { const w=26,h=18; box=[Math.max(0,Math.min(100-w,co[0]-w/2)), Math.max(6,Math.min(40-h,co[1]-h/2)), w, h]; }
+  return { box, cx:co[0], cy:co[1] };
+}
+function tripMapSVG(country){
+  const m = mapForCountry(country); if(!m) return '';
+  const [bx,by,bw,bh]=m.box; const r = bw*0.045;
+  return `<svg viewBox="${bx} ${by} ${bw} ${bh}" preserveAspectRatio="xMidYMid meet"><path d="${WORLD_BASE_PATH}" fill="rgba(255,255,255,0.10)"/><circle cx="${m.cx}" cy="${m.cy}" r="${r*2.8}" fill="var(--accent)" opacity="0.25"/><circle cx="${m.cx}" cy="${m.cy}" r="${r}" fill="var(--accent)"/></svg>`;
+}
 
 /* ===== DATENMODELL ===== */
 const KEYS = { trips:'rp_trips_v1', stops:'rp_stops_v1', hotels:'rp_hotels_v1', flights:'rp_flights_v1', activities:'rp_activities_v1', packing:'rp_packing_v1', todos:'rp_todos_v1' };
@@ -493,6 +522,31 @@ function fmtDate(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); re
 function daysUntil(iso){ if(!iso) return null; const d=new Date(iso+'T00:00:00'); const n=new Date(); n.setHours(0,0,0,0); return Math.round((d-n)/86400000); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 function tripYear(t){ return (t.start || t.end || '').slice(0,4); }
+/* Datum zwischen interner ISO-Ablage (yyyy-mm-dd) und Anzeige/Eingabe (TT.MM.JJJJ) wie in der Finanzen-App */
+function isoToDE(iso){ if(!iso) return ''; const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}.${m[2]}.${m[1]}` : String(iso); }
+function deToISO(s){ if(!s) return ''; s=String(s).trim(); if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s; const m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})$/); if(!m) return ''; let y=m[3]; if(y.length===2) y='20'+y; return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
+/* Setzt beim Tippen automatisch die Punkte (09092026 -> 09.09.2026). Selbst getippte Punkte bleiben erhalten. */
+function autoDate(el){
+  const raw = el.value;
+  const atEnd = el.selectionStart === raw.length;
+  // Nur Ziffern und Punkte, keine doppelten Punkte
+  let s = raw.replace(/[^\d.]/g,'').replace(/\.{2,}/g,'.');
+  let parts = s.split('.');
+  const max = [2,2,4];
+  // Überlauf eines Segments nach rechts weiterreichen (z.B. "25092026" -> 25.09.2026)
+  for (let i=0; i<3; i++){
+    if (parts[i] === undefined) break;
+    if (parts[i].length > max[i]){
+      const overflow = parts[i].slice(max[i]);
+      parts[i] = parts[i].slice(0, max[i]);
+      parts[i+1] = overflow + (parts[i+1] || '');
+    }
+  }
+  parts = parts.slice(0,3);
+  if (parts[2] !== undefined) parts[2] = parts[2].slice(0,4);
+  const out = parts.join('.');
+  if (out !== raw) { el.value = out; if (atEnd) el.setSelectionRange(out.length, out.length); }
+}
 
 /* ===== DIALOG / TOAST ===== */
 let _dialogResolve = null;
@@ -540,6 +594,10 @@ function countdownParts(t){
   return { big:'—', unit:'', label:'Kein Datum festgelegt', cls:'muted' };
 }
 
+/* Icons wie in der Finanzen-App */
+const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const ICON_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+
 function renderTripCards(){
   const el = $('trip-tiles');
   if (!trips.length) {
@@ -548,21 +606,122 @@ function renderTripCards(){
   }
   const sorted = [...trips].sort((a,b)=>(a.start||'9999').localeCompare(b.start||'9999'));
   el.innerHTML = `<div class="bento">${sorted.map(t => {
-    const st = statusOf(t);
-    const nStops = stops.filter(s=>s.tripId===t.id).length;
-    const nAct = activities.filter(a=>a.tripId===t.id).length;
     const cd = countdownParts(t);
-    return `<div class="bento-tile trip-tile" onclick="openTripScreen('${t.id}')">
-      <div class="tt-name">${esc(t.name)}</div>
-      <div class="tt-dest">${t.destination ? esc(t.destination) : (t.country ? esc(t.country) : '\u00A0')}</div>
-      <div class="tt-cd"><span class="tt-cd-val ${cd.cls}">${typeof cd.big==='number'?cd.big:esc(cd.big)}</span>${cd.unit?`<span class="tt-cd-unit">${cd.unit}</span>`:''}</div>
-      <div class="tt-cd-label">${cd.label}</div>
-      <div class="tt-foot">
-        <span class="cat-pill ${st.cls}">${st.label}</span>
-        <span class="tt-meta">${nStops} Stopp${nStops===1?'':'s'} · ${nAct} Akt.</span>
+    const map = t.country ? tripMapSVG(t.country) : '';
+    return `<div class="tile-wrap" data-id="${t.id}">
+      <div class="tile-slider">
+        <div class="bento-tile trip-tile" onclick="openTripScreen('${t.id}')">
+          <div class="tt-name">${esc(t.name)}</div>
+          <div class="tt-country">${t.country ? esc(t.country) : (t.destination ? esc(t.destination) : '\u00A0')}</div>
+          ${map ? `<div class="tt-map">${map}</div>` : ''}
+          <div class="tt-cd"><span class="tt-cd-val ${cd.cls}">${typeof cd.big==='number'?cd.big:esc(cd.big)}</span>${cd.unit?`<span class="tt-cd-unit">${cd.unit}</span>`:''}</div>
+          <div class="tt-cd-label">${cd.label}</div>
+        </div>
+        <div class="tile-action-bg">
+          <div class="swipe-edit">${ICON_EDIT}<span>Bearb.</span></div>
+          <div class="swipe-del">${ICON_DEL}<span>Lösch.</span></div>
+        </div>
       </div>
     </div>`;
   }).join('')}</div>`;
+  el.querySelectorAll('.tile-wrap').forEach(wrap => {
+    const id = wrap.dataset.id;
+    attachSwipeGeneric(wrap, () => deleteTripById(id), () => openModal('trip', id));
+  });
+}
+
+/* ===== SWIPE (1:1 aus der Finanzen-App übernommen) ===== */
+let _openSwipe = null;
+document.addEventListener('touchstart', (ev) => {
+  if (_openSwipe && !_openSwipe.contains(ev.target)) closeOpenSwipe();
+}, { passive: true, capture: true });
+
+function closeOpenSwipe() {
+  if (_openSwipe) {
+    const slider = _openSwipe;
+    slider.classList.remove('no-transition');
+    slider.style.transform = '';
+    slider._openPx = 0;
+    _openSwipe = null;
+  }
+}
+
+function attachSwipeGeneric(wrap, onDelete, onEdit) {
+  const slider = wrap.querySelector('.tile-slider');
+  const bgEl   = wrap.querySelector('.tile-action-bg');
+  if (!slider || !bgEl) return;
+
+  let REVEAL = 0;
+  const getReveal = () => { if (!REVEAL) REVEAL = bgEl.offsetWidth || 144; return REVEAL; };
+
+  const THRESHOLD = 50;
+  let startX = 0, startY = 0, curX = 0;
+  let dragging = false, decided = false, horizontal = false, openAtStart = false;
+
+  const setSlider = (px, animate) => {
+    slider.classList.toggle('no-transition', !animate);
+    slider.style.transform = px < 0 ? `translateX(${px}px)` : '';
+  };
+  const settle = (open) => {
+    const px = open ? -getReveal() : 0;
+    setSlider(px, true);
+    slider._openPx = open ? px : 0;
+    if (open) _openSwipe = slider;
+    else if (_openSwipe === slider) _openSwipe = null;
+  };
+
+  wrap.addEventListener('touchstart', (ev) => {
+    if (_openSwipe && _openSwipe !== slider) closeOpenSwipe();
+    const t = ev.touches[0];
+    startX = t.clientX; startY = t.clientY; curX = slider._openPx || 0;
+    dragging = true; decided = false; horizontal = false;
+    openAtStart = !!(slider._openPx);
+  }, { passive: true });
+
+  wrap.addEventListener('touchmove', (ev) => {
+    if (!dragging) return;
+    const t = ev.touches[0];
+    const mx = t.clientX - startX;
+    const my = t.clientY - startY;
+    if (!decided) {
+      if (Math.abs(mx) < 4 && Math.abs(my) < 4) return;
+      decided = true;
+      horizontal = Math.abs(mx) > Math.abs(my);
+    }
+    if (!horizontal) { if (openAtStart) { settle(false); openAtStart = false; } return; }
+    ev.stopPropagation();
+    const R = getReveal();
+    let px = (openAtStart ? -R : 0) + mx;
+    px = Math.max(-R, Math.min(0, px));
+    curX = px;
+    setSlider(px, false);
+  }, { passive: true });
+
+  wrap.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    if (!horizontal) { settle(openAtStart); return; }
+    const R = getReveal();
+    settle(openAtStart ? curX < -R / 2 : curX < -THRESHOLD);
+  });
+
+  wrap.querySelector('.swipe-del').addEventListener('click', (e) => {
+    e.stopPropagation(); closeOpenSwipe(); setTimeout(onDelete, 50);
+  });
+  wrap.querySelector('.swipe-edit').addEventListener('click', (e) => {
+    e.stopPropagation(); closeOpenSwipe(); setTimeout(onEdit, 50);
+  });
+}
+
+/* Reise inkl. aller zugehörigen Daten und Bilder löschen (über Swipe) */
+async function deleteTripById(id){
+  const t = trips.find(x=>x.id===id); if(!t) return;
+  const ok = await showDialog('Die Reise inkl. aller Stopps, Unterkünfte, Flüge, Aktivitäten und Listen wird unwiderruflich gelöscht.', { title:`„${t.name}" löschen?`, okText:'Löschen' });
+  if(!ok) return;
+  if (idbReady) { for (const a of activities.filter(x=>x.tripId===id)) for (const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); }
+  setArr('trip', trips.filter(x=>x.id!==id)); persist('trip');
+  ['stop','hotel','flight','activity','pack','todo'].forEach(tp=>{ setArr(tp, arr(tp).filter(x=>x.tripId!==id)); persist(tp); });
+  renderHome(); showToast('Gelöscht');
 }
 
 /* ===== REISE-DETAIL ===== */
@@ -578,7 +737,7 @@ function renderTripScreen(){
   const t = currentTrip();
   if (!t) { closeTripScreen(); return; }
   $('ts-name').textContent = t.name;
-  $('ts-dest').textContent = t.destination || t.country || '\u00A0';
+  $('ts-dest').textContent = t.country || t.destination || '\u00A0';
   $('tab-bar').innerHTML = TABS.map(([k,l]) => `<button class="tab-btn ${activeTab===k?'active':''}" onclick="switchTab('${k}')">${l}</button>`).join('');
   renderTabContent();
 }
@@ -612,7 +771,7 @@ function renderOverviewTab(t){
     <div class="section-label">Reisedaten</div>
     <div class="list"><div class="entry" onclick="openModal('trip', currentTripId)">
       <div class="entry-main"><div class="entry-name">${esc(t.name)}</div>
-      <div class="entry-sub">${t.destination?esc(t.destination)+' · ':''}${(t.start||t.end)?(fmtDate(t.start)||'?')+' – '+(fmtDate(t.end)||'?'):'Kein Datum'}</div>
+      <div class="entry-sub">${t.country?esc(t.country)+' · ':''}${(t.start||t.end)?(fmtDate(t.start)||'?')+' – '+(fmtDate(t.end)||'?'):'Kein Datum'}</div>
       ${t.country?`<div class="entry-pills"><span class="cat-pill pill-green">${esc(t.country)}</span></div>`:''}</div>
       <div class="entry-right">✎</div></div></div>`;
 }
@@ -704,24 +863,22 @@ async function renderActivityScreen(){
 const TITLES = { trip:'Reise', stop:'Stopp', hotel:'Unterkunft', flight:'Flug', activity:'Aktivität', pack:'Gegenstand', todo:'Aufgabe' };
 const SCHEMAS = {
   trip: [
-    { key:'name', label:'Reisename', type:'text', required:true, placeholder:'z.B. Namibia 2027' },
-    { key:'destination', label:'Ziel / Region', type:'text', placeholder:'z.B. Sossusvlei & NamibRand' },
-    { key:'country', label:'Land (für Weltkarte)', type:'country' },
-    { key:'start', label:'Start', type:'date' },
-    { key:'end', label:'Ende', type:'date' },
-    { key:'notes', label:'Notizen', type:'textarea', placeholder:'Visum, Reisezeit, Allgemeines …' }
+    { key:'name', label:'Reisename', type:'text', required:true, placeholder:'z.B. Namibia' },
+    { key:'country', label:'Land', type:'text', placeholder:'z.B. Namibia' },
+    { key:'start', label:'Start', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
+    { key:'end', label:'Ende', type:'text', date:true, placeholder:'z.B. 23.09.2026', pair:'end' }
   ],
   stop: [
     { key:'name', label:'Ort', type:'text', required:true, placeholder:'z.B. NamibRand' },
-    { key:'arrival', label:'Ankunft', type:'date' },
-    { key:'departure', label:'Abfahrt', type:'date' },
+    { key:'arrival', label:'Ankunft', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
+    { key:'departure', label:'Abfahrt', type:'text', date:true, placeholder:'z.B. 12.09.2026' },
     { key:'notes', label:'Notizen', type:'textarea' }
   ],
   hotel: [
     { key:'name', label:'Unterkunft', type:'text', required:true, placeholder:'z.B. Kulala Desert Lodge' },
     { key:'stopId', label:'Stopp', type:'select-stop' },
-    { key:'checkin', label:'Check-in', type:'date' },
-    { key:'checkout', label:'Check-out', type:'date' },
+    { key:'checkin', label:'Check-in', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
+    { key:'checkout', label:'Check-out', type:'text', date:true, placeholder:'z.B. 12.09.2026' },
     { key:'address', label:'Adresse', type:'text' },
     { key:'bookingRef', label:'Buchungsnummer', type:'text' },
     { key:'price', label:'Preis', type:'text', placeholder:'z.B. 240 € / Nacht' },
@@ -730,7 +887,7 @@ const SCHEMAS = {
   flight: [
     { key:'from', label:'Von', type:'text', required:true, placeholder:'z.B. Frankfurt (FRA)' },
     { key:'to', label:'Nach', type:'text', required:true, placeholder:'z.B. Windhoek (WDH)' },
-    { key:'date', label:'Datum', type:'date' },
+    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
     { key:'time', label:'Uhrzeit', type:'time' },
     { key:'airline', label:'Airline', type:'text' },
     { key:'flightNo', label:'Flugnummer', type:'text' },
@@ -741,7 +898,7 @@ const SCHEMAS = {
     { key:'name', label:'Aktivität', type:'text', required:true, placeholder:'z.B. Sonnenuntergang Düne 45' },
     { key:'stopId', label:'Stopp', type:'select-stop' },
     { key:'type', label:'Typ', type:'select', options:[['normal','Allgemein'],['foto','Fotografie']] },
-    { key:'date', label:'Datum', type:'date' },
+    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
     { key:'time', label:'Uhrzeit', type:'time' },
     { key:'notes', label:'Notizen', type:'textarea' },
     { key:'equipment', label:'Equipment (Komma-getrennt)', type:'text', fotoOnly:true, placeholder:'z.B. 14mm GM, Stativ, L-Bracket' },
@@ -749,19 +906,38 @@ const SCHEMAS = {
     { key:'images', label:'Referenzbilder', type:'images', fotoOnly:true }
   ],
   pack: [ { key:'name', label:'Gegenstand', type:'text', required:true }, { key:'category', label:'Kategorie', type:'text', placeholder:'z.B. Technik, Fotografie' } ],
-  todo: [ { key:'name', label:'Aufgabe', type:'text', required:true, placeholder:'z.B. Visum beantragen' }, { key:'due', label:'Fällig bis', type:'date' } ]
+  todo: [ { key:'name', label:'Aufgabe', type:'text', required:true, placeholder:'z.B. Visum beantragen' }, { key:'due', label:'Fällig bis', type:'text', date:true, placeholder:'z.B. 09.09.2026' } ]
 };
 
 let modalType=null, modalId=null, formImages=[];
 function fieldHTML(f, value){
   const v = value ?? '';
   const foto = f.fotoOnly ? ' data-foto-only="1"' : '';
+  if (f.date) return `<div class="field"${foto}><label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" autocomplete="off" oninput="autoDate(this)"></div>`;
   if (f.type==='textarea') return `<div class="field"${foto}><label>${f.label}</label><textarea id="f_${f.key}" placeholder="${esc(f.placeholder||'')}">${esc(v)}</textarea></div>`;
   if (f.type==='select') return `<div class="field"${foto}><label>${f.label}</label><select id="f_${f.key}" ${f.key==='type'?'onchange="onActivityTypeChange()"':''}>${f.options.map(([val,lab])=>`<option value="${val}" ${v===val?'selected':''}>${lab}</option>`).join('')}</select></div>`;
   if (f.type==='select-stop'){ const l=stops.filter(s=>s.tripId===currentTripId); return `<div class="field"${foto}><label>${f.label}</label><select id="f_${f.key}"><option value="">Kein Stopp</option>${l.map(s=>`<option value="${s.id}" ${v===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>`; }
-  if (f.type==='country') return `<div class="field"${foto}><label>${f.label}</label><select id="f_${f.key}"><option value="">— kein Land —</option>${COUNTRY_LIST.map(c=>`<option value="${esc(c)}" ${v===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>`;
   if (f.type==='images') return `<div class="field"${foto}><label>${f.label}</label><div class="img-grid" id="f_images_grid"></div><input type="file" id="f_images_input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files)"></div>`;
   return `<div class="field"${foto}><label>${f.label}</label><input type="${f.type}" id="f_${f.key}" value="${esc(v)}" placeholder="${esc(f.placeholder||'')}"></div>`;
+}
+/* Baut die Felder; Felder mit pair:'start'/'end' landen nebeneinander in einer .field-row (wie Finanzen). */
+function buildFields(list, entry){
+  let out='';
+  for (let i=0;i<list.length;i++){
+    const f=list[i];
+    if (f.pair==='start' && list[i+1] && list[i+1].pair==='end'){
+      const g=list[i+1];
+      out += `<div class="field field-row"><div>${innerField(f, entry?entry[f.key]:'')}</div><div>${innerField(g, entry?entry[g.key]:'')}</div></div>`;
+      i++;
+    } else out += fieldHTML(f, entry?entry[f.key]:'');
+  }
+  return out;
+}
+/* Label+Input ohne äußeren .field-Wrapper (für die zweispaltige Zeile) */
+function innerField(f, value){
+  const v = value ?? '';
+  if (f.date) return `<label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" autocomplete="off" oninput="autoDate(this)">`;
+  return `<label>${f.label}</label><input type="${f.type}" id="f_${f.key}" value="${esc(v)}" placeholder="${esc(f.placeholder||'')}">`;
 }
 function renderImageGrid(){ const g=$('f_images_grid'); if(!g) return; g.innerHTML = formImages.map((im,i)=> im.data
     ? `<div class="img-thumb"><img src="${im.data}"><button class="img-del" onclick="removeFormImage(${i})">✕</button></div>`
@@ -776,14 +952,15 @@ function openModal(type, id){
   modalType=type; modalId=id||null; formImages=[];
   const schema=SCHEMAS[type];
   const entry = id ? arr(type).find(x=>x.id===id) : null;
-  $('form-title').textContent = (id?'Bearbeiten – ':'Neu – ') + TITLES[type];
-  $('form-fields').innerHTML = schema.map(f=>fieldHTML(f, entry?entry[f.key]:'')).join('');
+  $('form-title').textContent = type==='trip' ? (id?'Reise bearbeiten':'Neue Reise') : ((id?'Bearbeiten – ':'Neu – ') + TITLES[type]);
+  $('form-fields').innerHTML = buildFields(schema.filter(f=>!(f.editOnly && !id)), entry);
   // Arrays zurück in Text
   if (entry) {
     if (entry.equipment && $('f_equipment')) $('f_equipment').value = entry.equipment.join(', ');
     if (entry.motives && $('f_motives')) $('f_motives').value = entry.motives.join('\n');
   }
-  $('form-danger-row').style.display = id?'flex':'none';
+  // Löschen im Reise-Formular ausgeblendet – dort wird über Swipe gelöscht.
+  $('form-danger-row').style.display = (id && type!=='trip') ? 'flex' : 'none';
   if (type==='activity'){
     formImages = [];
     renderImageGrid();
@@ -805,8 +982,10 @@ function closeModal(){ $('form-overlay').classList.remove('open'); modalType=nul
 async function saveModal(){
   const type=modalType, schema=SCHEMAS[type], obj={};
   for (const f of schema){
+    if (f.editOnly && !modalId) continue;
     if (f.type==='images'){ obj.images = await persistFormImages(); continue; }
     const el=$('f_'+f.key); let val=el?el.value.trim():'';
+    if (f.date){ obj[f.key]=deToISO(val); continue; }
     if (f.key==='equipment'){ obj.equipment = val?val.split(',').map(s=>s.trim()).filter(Boolean):[]; continue; }
     if (f.key==='motives'){ obj.motives = val?val.split('\n').map(s=>s.trim()).filter(Boolean):[]; continue; }
     if (f.required && !val){ await notify(`Bitte "${f.label}" ausfüllen.`,'Angabe fehlt'); return; }
