@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0a0c">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0c'/%3E%3Ctext x='90' y='90' font-family='-apple-system,Helvetica,Arial,sans-serif' font-size='96' font-weight='600' fill='%23ffffff' text-anchor='middle' dominant-baseline='central' letter-spacing='-2'%3ER%3C/text%3E%3C/svg%3E">
-<title>Reisen – Route, Unterkünfte & Fotografie</title>
+<title>Reisen – Route, Hotels & Fotografie</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -177,6 +177,21 @@
   .stat-value { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .sl-count { color: var(--muted-2); font-weight: 600; }
 
+  /* Checkliste im Apple-Notizen-Stil: rahmenlos, direkt eintippbar */
+  .todo-list { display: flex; flex-direction: column; padding: 0 2px; }
+  .todo-row { display: flex; align-items: center; gap: 12px; padding: 3px 0; }
+  .todo-check { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%; border: 1.5px solid var(--stroke-hi); background: transparent; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s var(--spring), border-color 0.2s; }
+  .todo-check svg { width: 12px; height: 12px; color: #06280f; opacity: 0; transform: scale(0.5); transition: all 0.2s var(--spring); }
+  .todo-check.checked { background: var(--green); border-color: var(--green); }
+  .todo-check.checked svg { opacity: 1; transform: scale(1); }
+  .todo-check.ghost { border-style: dashed; border-color: var(--stroke); cursor: default; }
+  .todo-text { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text); font: inherit; font-size: 0.95rem; padding: 9px 0; }
+  .todo-text::placeholder { color: var(--muted-2); }
+  .todo-row.checked .todo-text { color: var(--muted-2); text-decoration: line-through; }
+  .todo-del { flex: 0 0 28px; width: 28px; height: 28px; border: none; background: transparent; color: transparent; cursor: pointer; font-size: 0.9rem; border-radius: 99px; transition: color 0.2s; }
+  .todo-row:hover .todo-del { color: var(--muted-2); }
+  .todo-del:hover { color: var(--danger); }
+
   .check-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 16px; cursor: pointer; transition: background 0.2s; }
   .check-row:hover { background: var(--glass-hi); }
   .checkbox { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--stroke-hi); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s var(--spring); }
@@ -186,8 +201,6 @@
   .check-body { flex: 1; min-width: 0; }
   .check-name { font-size: 0.92rem; font-weight: 500; }
   .checked .check-name { color: var(--muted-2); text-decoration: line-through; }
-  .check-sub { font-size: 0.72rem; color: var(--muted-2); margin-top: 2px; }
-  .check-sub.overdue { color: var(--danger); font-weight: 600; }
   .check-del { flex-shrink: 0; width: 30px; height: 30px; border-radius: 99px; border: none; background: transparent; color: var(--muted-2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
   .check-del:hover { color: var(--danger); }
   .check-group { display: flex; flex-direction: column; gap: 3px; }
@@ -316,7 +329,7 @@
       <h2 id="as-name">Aktivität</h2>
       <p id="as-sub">&nbsp;</p>
     </div>
-    <button class="icon-btn" aria-label="Bearbeiten" onclick="openModal('activity', currentActivityId)">✎</button>
+    <button class="icon-btn" aria-label="Bearbeiten" onclick="editCurrentActivity()">✎</button>
   </div>
   <div id="activity-detail"></div>
 </div>
@@ -505,7 +518,7 @@ let flights    = safeParse(store.get(KEYS.flights), []);
 let activities = safeParse(store.get(KEYS.activities), []);
 let packing    = safeParse(store.get(KEYS.packing), []);
 let todos      = safeParse(store.get(KEYS.todos), []);
-const DATA = { trip:['trips',KEYS.trips], stop:['stops',KEYS.stops], hotel:['hotels',KEYS.hotels], flight:['flights',KEYS.flights], activity:['activities',KEYS.activities], pack:['packing',KEYS.packing], todo:['todos',KEYS.todos] };
+const DATA = { trip:['trips',KEYS.trips], stop:['stops',KEYS.stops], hotel:['hotels',KEYS.hotels], flight:['flights',KEYS.flights], activity:['activities',KEYS.activities], photo:['activities',KEYS.activities], pack:['packing',KEYS.packing], todo:['todos',KEYS.todos] };
 const REFS = { trips:()=>trips, stops:()=>stops, hotels:()=>hotels, flights:()=>flights, activities:()=>activities, packing:()=>packing, todos:()=>todos };
 function arr(type){ return REFS[DATA[type][0]](); }
 function setArr(type, val){
@@ -523,6 +536,14 @@ function fmtDate(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); re
 function daysUntil(iso){ if(!iso) return null; const d=new Date(iso+'T00:00:00'); const n=new Date(); n.setHours(0,0,0,0); return Math.round((d-n)/86400000); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 function tripYear(t){ return (t.start || t.end || '').slice(0,4); }
+/* Reisedauer in Tagen, inklusive An- und Abreisetag */
+function tripDuration(t){
+  if (!t.start || !t.end) return '';
+  const a = new Date(t.start+'T00:00:00'), b = new Date(t.end+'T00:00:00');
+  if (isNaN(a) || isNaN(b) || b < a) return '';
+  const n = Math.round((b - a) / 86400000) + 1;
+  return n + (n===1 ? ' Tag' : ' Tage');
+}
 /* Datum zwischen interner ISO-Ablage (yyyy-mm-dd) und Anzeige/Eingabe (TT.MM.JJJJ) wie in der Finanzen-App */
 function isoToDE(iso){ if(!iso) return ''; const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}.${m[2]}.${m[1]}` : String(iso); }
 function deToISO(s){ if(!s) return ''; s=String(s).trim(); if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s; const m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})$/); if(!m) return ''; let y=m[3]; if(y.length===2) y='20'+y; return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
@@ -602,7 +623,7 @@ const ICON_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 function renderTripCards(){
   const el = $('trip-tiles');
   if (!trips.length) {
-    el.innerHTML = `<div class="empty glass"><b>Noch keine Reise angelegt</b>Leg deine erste Reise an – Route, Unterkünfte, Flüge, Fotografie-Planung und Packliste an einem Ort.</div>`;
+    el.innerHTML = `<div class="empty glass"><b>Noch keine Reise angelegt</b>Leg deine erste Reise an – Route, Flüge, Hotels, Fotografie-Planung und Packliste an einem Ort.</div>`;
     return;
   }
   const sorted = [...trips].sort((a,b)=>(a.start||'9999').localeCompare(b.start||'9999'));
@@ -717,7 +738,7 @@ function attachSwipeGeneric(wrap, onDelete, onEdit) {
 /* Reise inkl. aller zugehörigen Daten und Bilder löschen (über Swipe) */
 async function deleteTripById(id){
   const t = trips.find(x=>x.id===id); if(!t) return;
-  const ok = await showDialog('Die Reise inkl. aller Stopps, Unterkünfte, Flüge, Aktivitäten und Listen wird unwiderruflich gelöscht.', { title:`„${t.name}" löschen?`, okText:'Löschen' });
+  const ok = await showDialog('Die Reise inkl. aller Stopps, Flüge, Hotels, Aktivitäten und Listen wird unwiderruflich gelöscht.', { title:`„${t.name}" löschen?`, okText:'Löschen' });
   if(!ok) return;
   if (idbReady) { for (const a of activities.filter(x=>x.tripId===id)) for (const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); }
   setArr('trip', trips.filter(x=>x.id!==id)); persist('trip');
@@ -727,7 +748,7 @@ async function deleteTripById(id){
 
 /* ===== REISE-DETAIL ===== */
 let currentTripId = null, activeTab = 'overview';
-const TABS = [['overview','Übersicht'],['route','Route'],['hotels','Unterkünfte'],['flights','Flüge'],['activities','Aktivitäten'],['packing','Packliste']];
+const TABS = [['overview','Übersicht'],['route','Route'],['flights','Flüge'],['hotels','Hotels'],['activities','Aktivitäten'],['photos','Fotografie'],['packing','Packliste']];
 
 function openTripScreen(id){ currentTripId=id; activeTab='overview'; renderTripScreen(); $('trip-screen').classList.add('open'); }
 function closeTripScreen(){ $('trip-screen').classList.remove('open'); currentTripId=null; renderHome(); }
@@ -740,14 +761,15 @@ function renderTripScreen(){
   $('ts-name').textContent = t.name;
   const land = t.country || t.destination || '';
   const range = (t.start || t.end) ? `${fmtDate(t.start)||'?'} – ${fmtDate(t.end)||'?'}` : '';
-  $('ts-dest').textContent = [land, range].filter(Boolean).join(' · ') || '\u00A0';
+  const dur = tripDuration(t);
+  $('ts-dest').textContent = [land, range, dur].filter(Boolean).join(' · ') || '\u00A0';
   $('tab-bar').innerHTML = TABS.map(([k,l]) => `<button class="tab-btn ${activeTab===k?'active':''}" onclick="switchTab('${k}')">${l}</button>`).join('');
   renderTabContent();
 }
 function renderTabContent(){
   const t = currentTrip(); if(!t) return;
   const el = $('tab-content');
-  const map = { overview:renderOverviewTab, route:renderRouteTab, hotels:renderHotelsTab, flights:renderFlightsTab, activities:renderActivitiesTab, packing:renderPackingTab };
+  const map = { overview:renderOverviewTab, route:renderRouteTab, hotels:renderHotelsTab, flights:renderFlightsTab, activities:renderActivitiesTab, photos:renderPhotosTab, packing:renderPackingTab };
   el.innerHTML = map[activeTab](t);
 }
 
@@ -773,10 +795,10 @@ function renderOverviewTab(t){
       ${map ? `<div class="ov-map">${map}</div>` : ''}
     </div>
     <div class="ov-stats">
-      <div class="stat"><div class="stat-label">Stopps</div><div class="stat-value">${c('stop')}</div></div>
-      <div class="stat"><div class="stat-label">Unterkünfte</div><div class="stat-value">${c('hotel')}</div></div>
       <div class="stat"><div class="stat-label">Flüge</div><div class="stat-value">${c('flight')}</div></div>
-      <div class="stat"><div class="stat-label">Aktivitäten</div><div class="stat-value">${c('activity')}</div></div>
+      <div class="stat"><div class="stat-label">Hotels</div><div class="stat-value">${c('hotel')}</div></div>
+      <div class="stat"><div class="stat-label">Aktivitäten</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type!=='foto').length}</div></div>
+      <div class="stat"><div class="stat-label">Fotografie</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type==='foto').length}</div></div>
     </div>
   </div>`;
   return hero + renderTodosSection(t);
@@ -786,14 +808,14 @@ function stopLabel(id){ const s=stops.find(x=>x.id===id); return s?s.name:''; }
 function renderRouteTab(t){
   const list = stops.filter(s=>s.tripId===t.id).sort((a,b)=>(a.arrival||'9999').localeCompare(b.arrival||'9999'));
   const body = list.length ? `<div class="list">${list.map(s=>`<div class="entry" onclick="openModal('stop','${s.id}')"><div class="entry-main"><div class="entry-name">${esc(s.name)}</div>${(s.arrival||s.departure)?`<div class="entry-sub">${fmtDate(s.arrival)||'?'} – ${fmtDate(s.departure)||'?'}</div>`:''}${s.notes?`<div class="entry-sub">${esc(s.notes)}</div>`:''}</div></div>`).join('')}</div>`
-    : `<div class="empty glass"><b>Noch keine Stopps</b>Leg die Route deiner Reise fest – jeder Stopp kann eigene Unterkünfte und Aktivitäten haben.</div>`;
+    : `<div class="empty glass"><b>Noch keine Stopps</b>Leg die Route deiner Reise fest – jeder Stopp kann eigene Hotels und Aktivitäten haben.</div>`;
   return body + `<button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
 }
 function renderHotelsTab(t){
   const list = hotels.filter(s=>s.tripId===t.id).sort((a,b)=>(a.checkin||'9999').localeCompare(b.checkin||'9999'));
   const body = list.length ? `<div class="list">${list.map(h=>{const sn=stopLabel(h.stopId);return `<div class="entry" onclick="openModal('hotel','${h.id}')"><div class="entry-main"><div class="entry-name">${esc(h.name)}</div>${(h.checkin||h.checkout)?`<div class="entry-sub">${fmtDate(h.checkin)||'?'} – ${fmtDate(h.checkout)||'?'}</div>`:''}${h.address?`<div class="entry-sub">${esc(h.address)}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">${h.price?`<div class="entry-name">${esc(h.price)}</div>`:''}</div></div>`;}).join('')}</div>`
-    : `<div class="empty glass"><b>Noch keine Unterkunft</b>Trage Hotels, Lodges oder Camps mit Check-in/-out und Buchungsdaten ein.</div>`;
-  return body + `<button class="add-btn" onclick="openModal('hotel')">＋ Unterkunft hinzufügen</button>`;
+    : `<div class="empty glass"><b>Noch kein Hotel</b>Trage Hotels, Lodges oder Camps mit Check-in/-out und Buchungsdaten ein.</div>`;
+  return body + `<button class="add-btn" onclick="openModal('hotel')">＋ Hotel hinzufügen</button>`;
 }
 function renderFlightsTab(t){
   const list = flights.filter(s=>s.tripId===t.id).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
@@ -801,11 +823,19 @@ function renderFlightsTab(t){
     : `<div class="empty glass"><b>Noch kein Flug</b>Erfasse deine Flüge inkl. Airline, Flugnummer und Buchungsnummer.</div>`;
   return body + `<button class="add-btn" onclick="openModal('flight')">＋ Flug hinzufügen</button>`;
 }
+/* Aktivitäten: alles außer Fotografie */
 function renderActivitiesTab(t){
-  const list = activities.filter(s=>s.tripId===t.id).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);const foto=a.type==='foto';return `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}<div class="entry-pills">${foto?`<span class="cat-pill pill-violet">📷 Fotografie</span>`:`<span class="cat-pill pill-muted">Allgemein</span>`}${sn?`<span class="cat-pill pill-blue">${esc(sn)}</span>`:''}${foto&&a.images&&a.images.length?`<span class="cat-pill pill-orange">${a.images.length} Foto${a.images.length===1?'':'s'}</span>`:''}</div></div><div class="entry-right">›</div></div>`;}).join('')}</div>`
-    : `<div class="empty glass"><b>Noch keine Aktivität</b>Plane Ausflüge, Touren oder Fotografie-Sessions inklusive Equipment und Referenzbildern.</div>`;
+  const list = activities.filter(s=>s.tripId===t.id && s.type!=='foto').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);return `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">›</div></div>`;}).join('')}</div>`
+    : `<div class="empty glass"><b>Noch keine Aktivität</b>Plane Ausflüge, Touren und alles, was du unterwegs machen möchtest.</div>`;
   return body + `<button class="add-btn" onclick="openModal('activity')">＋ Aktivität hinzufügen</button>`;
+}
+/* Fotografie: eigener Bereich mit Equipment, Motiven und Referenzbildern */
+function renderPhotosTab(t){
+  const list = activities.filter(s=>s.tripId===t.id && s.type==='foto').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);const n=(a.images&&a.images.length)||0;return `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}<div class="entry-pills">${sn?`<span class="cat-pill pill-blue">${esc(sn)}</span>`:''}${n?`<span class="cat-pill pill-orange">${n} Foto${n===1?'':'s'}</span>`:''}${a.equipment&&a.equipment.length?`<span class="cat-pill pill-violet">${a.equipment.length} Equipment</span>`:''}</div></div><div class="entry-right">›</div></div>`;}).join('')}</div>`
+    : `<div class="empty glass"><b>Noch keine Foto-Session</b>Plane deine Shootings mit Equipment, Motiven und Referenzbildern.</div>`;
+  return body + `<button class="add-btn" onclick="openModal('photo')">＋ Foto-Session hinzufügen</button>`;
 }
 
 const PACK_TEMPLATE = [['Reisepass','Dokumente'],['Impfpass','Dokumente'],['Auslandskrankenversicherung','Dokumente'],['Flugtickets / Buchungen','Dokumente'],['Ladekabel & Netzteil','Technik'],['Powerbank','Technik'],['Reiseadapter','Technik'],['Kamera-Body','Fotografie'],['Objektive','Fotografie'],['Speicherkarten','Fotografie'],['Ersatzakkus','Fotografie'],['Stativ','Fotografie'],['Sonnencreme','Hygiene & Gesundheit'],['Mückenschutz','Hygiene & Gesundheit'],['Reiseapotheke','Hygiene & Gesundheit']];
@@ -827,13 +857,49 @@ function renderPackingTab(t){
 function quickAddPack(){ const inp=$('quick-pack-name'); const n=inp.value.trim(); if(!n) return; packing.push({id:uid(),tripId:currentTripId,name:n,category:'Sonstiges',checked:false}); persist('pack'); inp.value=''; renderTabContent(); }
 async function loadPackTemplate(){ const ok=await showDialog('Fügt eine Standard-Packliste mit gängigen Kategorien hinzu.',{title:'Standard-Vorlage laden',okText:'Hinzufügen'}); if(!ok) return; PACK_TEMPLATE.forEach(([name,category])=>packing.push({id:uid(),tripId:currentTripId,name,category,checked:false})); persist('pack'); renderTabContent(); }
 
+/* Checkliste im Apple-Notizen-Stil: rahmenlos, direkt eintippbar,
+   erledigte werden durchgestrichen und ans Ende geschoben. */
 function renderTodosSection(t){
-  const list = todos.filter(s=>s.tripId===t.id).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
-  const done = list.filter(i=>i.checked).length;
-  let body = `<div class="section-label">Checkliste${list.length?` <span class="sl-count">${done}/${list.length}</span>`:''}</div>`;
-  if (!list.length) body += `<div class="empty glass"><b>Noch keine Aufgaben</b>Was muss vor der Reise erledigt werden? z.B. Impfungen, Visum, Reiseversicherung.</div>`;
-  else body += `<div class="check-group glass" style="padding:6px">${list.map(i=>{const od=i.due&&!i.checked&&i.due<todayISO();return `<div class="check-row ${i.checked?'checked':''}" onclick="toggleCheck('todo','${i.id}')"><div class="checkbox ${i.checked?'checked':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="check-body"><div class="check-name">${esc(i.name)}</div>${i.due?`<div class="check-sub ${od?'overdue':''}">${od?'Überfällig · ':'Fällig bis '}${fmtDate(i.due)}</div>`:''}</div><button class="check-del" onclick="event.stopPropagation();removeItem('todo','${i.id}')">✕</button></div>`;}).join('')}</div>`;
-  return body + `<button class="add-btn" onclick="openModal('todo')">＋ Aufgabe hinzufügen</button>`;
+  const list = todos.filter(s=>s.tripId===t.id);
+  const open = list.filter(i=>!i.checked);
+  const done = list.filter(i=>i.checked);
+  const ordered = [...open, ...done];
+  const rows = ordered.map(i => `
+    <div class="todo-row${i.checked?' checked':''}">
+      <button class="todo-check${i.checked?' checked':''}" onclick="toggleTodo('${i.id}')" aria-label="Erledigt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </button>
+      <input class="todo-text" value="${esc(i.name)}" onchange="renameTodo('${i.id}', this.value)"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      <button class="todo-del" onclick="removeTodo('${i.id}')" aria-label="Löschen">✕</button>
+    </div>`).join('');
+  const newRow = `
+    <div class="todo-row todo-new">
+      <span class="todo-check ghost"></span>
+      <input class="todo-text" id="todo-new" placeholder="Neue Aufgabe …"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();addTodoInline();}"
+             onblur="addTodoInline(true)">
+    </div>`;
+  const count = list.length ? ` <span class="sl-count">${done.length}/${list.length}</span>` : '';
+  return `<div class="section-label">Checkliste${count}</div><div class="todo-list">${rows}${newRow}</div>`;
+}
+function toggleTodo(id){ const i=todos.find(x=>x.id===id); if(!i) return; i.checked=!i.checked; persist('todo'); renderTabContent(); }
+function renameTodo(id, val){
+  const i=todos.find(x=>x.id===id); if(!i) return;
+  const name=val.trim();
+  if (!name) { setArr('todo', todos.filter(x=>x.id!==id)); persist('todo'); renderTabContent(); return; }
+  i.name=name; persist('todo');
+}
+function removeTodo(id){ setArr('todo', todos.filter(x=>x.id!==id)); persist('todo'); renderTabContent(); }
+function addTodoInline(silent){
+  const inp=$('todo-new'); if(!inp) return;
+  const name=inp.value.trim();
+  if (!name) return;
+  todos.push({ id:uid(), tripId:currentTripId, name, checked:false });
+  persist('todo');
+  renderTabContent();
+  // Nach dem Anlegen direkt weitertippen können
+  if (!silent) { const next=$('todo-new'); if(next) next.focus(); }
 }
 function toggleCheck(type,id){ const it=arr(type).find(x=>x.id===id); if(!it) return; it.checked=!it.checked; persist(type); renderTabContent(); }
 async function removeItem(type,id){ const ok=await showDialog('Diesen Eintrag wirklich löschen?',{title:'Löschen',okText:'Löschen'}); if(!ok) return; setArr(type, arr(type).filter(x=>x.id!==id)); persist(type); renderTabContent(); }
@@ -841,6 +907,11 @@ async function removeItem(type,id){ const ok=await showDialog('Diesen Eintrag wi
 /* ===== AKTIVITÄTS-DETAIL SCREEN ===== */
 let currentActivityId = null;
 function openActivityScreen(id){ currentActivityId=id; renderActivityScreen(); $('activity-screen').classList.add('open'); }
+/* Bearbeiten öffnet je nach Eintrag das Aktivitäts- oder das Fotografie-Formular */
+function editCurrentActivity(){
+  const a = activities.find(x=>x.id===currentActivityId); if(!a) return;
+  openModal(a.type==='foto' ? 'photo' : 'activity', currentActivityId);
+}
 function closeActivityScreen(){ $('activity-screen').classList.remove('open'); currentActivityId=null; renderTabContent(); }
 async function renderActivityScreen(){
   const a = activities.find(x=>x.id===currentActivityId);
@@ -866,7 +937,7 @@ async function renderActivityScreen(){
 }
 
 /* ===== FORMULAR-MODAL ===== */
-const TITLES = { trip:'Reise', stop:'Stopp', hotel:'Unterkunft', flight:'Flug', activity:'Aktivität', pack:'Gegenstand', todo:'Aufgabe' };
+const TITLES = { trip:'Reise', stop:'Stopp', hotel:'Hotel', flight:'Flug', activity:'Aktivität', photo:'Fotografie', pack:'Gegenstand', todo:'Aufgabe' };
 const SCHEMAS = {
   trip: [
     { key:'name', label:'Reisename', type:'text', required:true, placeholder:'z.B. Namibia' },
@@ -881,7 +952,7 @@ const SCHEMAS = {
     { key:'notes', label:'Notizen', type:'textarea' }
   ],
   hotel: [
-    { key:'name', label:'Unterkunft', type:'text', required:true, placeholder:'z.B. Kulala Desert Lodge' },
+    { key:'name', label:'Hotel', type:'text', required:true, placeholder:'z.B. Kulala Desert Lodge' },
     { key:'stopId', label:'Stopp', type:'select-stop' },
     { key:'checkin', label:'Check-in', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
     { key:'checkout', label:'Check-out', type:'text', date:true, placeholder:'z.B. 12.09.2026' },
@@ -901,30 +972,34 @@ const SCHEMAS = {
     { key:'notes', label:'Notizen', type:'textarea' }
   ],
   activity: [
-    { key:'name', label:'Aktivität', type:'text', required:true, placeholder:'z.B. Sonnenuntergang Düne 45' },
+    { key:'name', label:'Aktivität', type:'text', required:true, placeholder:'z.B. Sundowner Düne 45' },
     { key:'stopId', label:'Stopp', type:'select-stop' },
-    { key:'type', label:'Typ', type:'select', options:[['normal','Allgemein'],['foto','Fotografie']] },
+    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
+    { key:'time', label:'Uhrzeit', type:'time' },
+    { key:'notes', label:'Notizen', type:'textarea' }
+  ],
+  photo: [
+    { key:'name', label:'Session', type:'text', required:true, placeholder:'z.B. Milchstraße über den Dünen' },
+    { key:'stopId', label:'Stopp', type:'select-stop' },
     { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
     { key:'time', label:'Uhrzeit', type:'time' },
     { key:'notes', label:'Notizen', type:'textarea' },
-    { key:'equipment', label:'Equipment (Komma-getrennt)', type:'text', fotoOnly:true, placeholder:'z.B. 14mm GM, Stativ, L-Bracket' },
-    { key:'motives', label:'Motive (eine Zeile pro Motiv)', type:'textarea', fotoOnly:true, placeholder:'z.B. Milchstraße über den Dünen' },
-    { key:'images', label:'Referenzbilder', type:'images', fotoOnly:true }
+    { key:'equipment', label:'Equipment (Komma-getrennt)', type:'text', placeholder:'z.B. 14mm GM, Stativ, L-Bracket' },
+    { key:'motives', label:'Motive (eine Zeile pro Motiv)', type:'textarea', placeholder:'z.B. Milchstraße über den Dünen' },
+    { key:'images', label:'Referenzbilder', type:'images' }
   ],
   pack: [ { key:'name', label:'Gegenstand', type:'text', required:true }, { key:'category', label:'Kategorie', type:'text', placeholder:'z.B. Technik, Fotografie' } ],
-  todo: [ { key:'name', label:'Aufgabe', type:'text', required:true, placeholder:'z.B. Visum beantragen' }, { key:'due', label:'Fällig bis', type:'text', date:true, placeholder:'z.B. 09.09.2026' } ]
+  todo: [ { key:'name', label:'Aufgabe', type:'text', required:true, placeholder:'z.B. Visum beantragen' } ]
 };
 
 let modalType=null, modalId=null, formImages=[];
 function fieldHTML(f, value){
   const v = value ?? '';
-  const foto = f.fotoOnly ? ' data-foto-only="1"' : '';
-  if (f.date) return `<div class="field"${foto}><label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" autocomplete="off" oninput="autoDate(this)"></div>`;
-  if (f.type==='textarea') return `<div class="field"${foto}><label>${f.label}</label><textarea id="f_${f.key}" placeholder="${esc(f.placeholder||'')}">${esc(v)}</textarea></div>`;
-  if (f.type==='select') return `<div class="field"${foto}><label>${f.label}</label><select id="f_${f.key}" ${f.key==='type'?'onchange="onActivityTypeChange()"':''}>${f.options.map(([val,lab])=>`<option value="${val}" ${v===val?'selected':''}>${lab}</option>`).join('')}</select></div>`;
-  if (f.type==='select-stop'){ const l=stops.filter(s=>s.tripId===currentTripId); return `<div class="field"${foto}><label>${f.label}</label><select id="f_${f.key}"><option value="">Kein Stopp</option>${l.map(s=>`<option value="${s.id}" ${v===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>`; }
-  if (f.type==='images') return `<div class="field"${foto}><label>${f.label}</label><div class="img-grid" id="f_images_grid"></div><input type="file" id="f_images_input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files)"></div>`;
-  return `<div class="field"${foto}><label>${f.label}</label><input type="${f.type}" id="f_${f.key}" value="${esc(v)}" placeholder="${esc(f.placeholder||'')}"></div>`;
+  if (f.date) return `<div class="field"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" autocomplete="off" oninput="autoDate(this)"></div>`;
+  if (f.type==='textarea') return `<div class="field"><label>${f.label}</label><textarea id="f_${f.key}" placeholder="${esc(f.placeholder||'')}">${esc(v)}</textarea></div>`;
+  if (f.type==='select-stop'){ const l=stops.filter(s=>s.tripId===currentTripId); return `<div class="field"><label>${f.label}</label><select id="f_${f.key}"><option value="">Kein Stopp</option>${l.map(s=>`<option value="${s.id}" ${v===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>`; }
+  if (f.type==='images') return `<div class="field"><label>${f.label}</label><div class="img-grid" id="f_images_grid"></div><input type="file" id="f_images_input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files)"></div>`;
+  return `<div class="field"><label>${f.label}</label><input type="${f.type}" id="f_${f.key}" value="${esc(v)}" placeholder="${esc(f.placeholder||'')}"></div>`;
 }
 /* Baut die Felder; Felder mit pair:'start'/'end' landen nebeneinander in einer .field-row (wie Finanzen). */
 function buildFields(list, entry){
@@ -952,7 +1027,6 @@ function renderImageGrid(){ const g=$('f_images_grid'); if(!g) return; g.innerHT
 function removeFormImage(i){ formImages.splice(i,1); renderImageGrid(); }
 function resizeImage(file, maxW=900, q=0.72){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>{ const img=new Image(); img.onload=()=>{ let w=img.width,h=img.height; if(w>maxW){h=Math.round(h*maxW/w);w=maxW;} const cv=document.createElement('canvas'); cv.width=w;cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); res(cv.toDataURL('image/jpeg',q)); }; img.onerror=rej; img.src=e.target.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
 async function handleImageFiles(files){ for(const f of files){ try{ formImages.push({ data: await resizeImage(f), isNew:true }); }catch(e){} } renderImageGrid(); const inp=$('f_images_input'); if(inp) inp.value=''; }
-function onActivityTypeChange(){ const foto=$('f_type').value==='foto'; document.querySelectorAll('#form-fields [data-foto-only]').forEach(el=>el.style.display=foto?'':'none'); }
 
 function openModal(type, id){
   modalType=type; modalId=id||null; formImages=[];
@@ -967,10 +1041,9 @@ function openModal(type, id){
   }
   // Löschen im Reise-Formular ausgeblendet – dort wird über Swipe gelöscht.
   $('form-danger-row').style.display = (id && type!=='trip') ? 'flex' : 'none';
-  if (type==='activity'){
+  if (type==='photo'){
     formImages = [];
     renderImageGrid();
-    onActivityTypeChange();
     if (entry && entry.images && entry.images.length) loadFormImages(entry.images);
   }
   $('form-overlay').classList.add('open');
@@ -982,7 +1055,7 @@ async function loadFormImages(refs){
   for (const im of formImages) {
     if (!im.data && im.id && idbReady) { const d=await idbGet(im.id); if(d) im.data=d; }
   }
-  if (modalType==='activity') renderImageGrid();
+  if (modalType==='photo') renderImageGrid();
 }
 function closeModal(){ $('form-overlay').classList.remove('open'); modalType=null; modalId=null; formImages=[]; }
 async function saveModal(){
@@ -998,12 +1071,15 @@ async function saveModal(){
     obj[f.key]=val;
   }
   if (type!=='trip') obj.tripId=currentTripId;
+  // Typ wird nicht mehr im Formular gewählt, sondern ergibt sich aus dem Bereich
+  if (type==='photo') obj.type='foto';
+  else if (type==='activity') obj.type='normal';
   if (modalId){ Object.assign(arr(type).find(x=>x.id===modalId), obj); }
   else { obj.id=uid(); if(type==='pack'||type==='todo') obj.checked=false; arr(type).push(obj); }
   persist(type);
   closeModal();
   if (type==='trip'){ renderHome(); if(currentTripId) renderTripScreen(); }
-  else if (type==='activity' && currentActivityId){ renderActivityScreen(); renderTabContent(); }
+  else if ((type==='activity'||type==='photo') && currentActivityId){ renderActivityScreen(); renderTabContent(); }
   else renderTabContent();
   showToast('Gespeichert');
 }
@@ -1026,7 +1102,7 @@ async function persistFormImages(){
 }
 async function deleteCurrentEntry(){
   const type=modalType, id=modalId; if(!id) return;
-  const ok=await showDialog(type==='trip'?'Die Reise inkl. aller Stopps, Unterkünfte, Flüge, Aktivitäten und Listen wird unwiderruflich gelöscht.':'Dieser Eintrag wird unwiderruflich gelöscht.',{title:'Wirklich löschen?',okText:'Löschen'});
+  const ok=await showDialog(type==='trip'?'Die Reise inkl. aller Stopps, Hotels, Flüge, Aktivitäten und Listen wird unwiderruflich gelöscht.':'Dieser Eintrag wird unwiderruflich gelöscht.',{title:'Wirklich löschen?',okText:'Löschen'});
   if(!ok) return;
   if (type==='trip'){
     if (idbReady) { for (const a of activities.filter(x=>x.tripId===id)) { for (const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); } }
@@ -1034,7 +1110,7 @@ async function deleteCurrentEntry(){
     ['stop','hotel','flight','activity','pack','todo'].forEach(tp=>{ setArr(tp, arr(tp).filter(x=>x.tripId!==id)); persist(tp); });
     closeModal(); closeTripScreen();
   } else {
-    if (type==='activity' && idbReady) { const a=activities.find(x=>x.id===id); if(a) for(const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); }
+    if ((type==='activity'||type==='photo') && idbReady) { const a=activities.find(x=>x.id===id); if(a) for(const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); }
     setArr(type, arr(type).filter(x=>x.id!==id)); persist(type);
     closeModal();
     if (type==='activity' && currentActivityId===id){ closeActivityScreen(); }
