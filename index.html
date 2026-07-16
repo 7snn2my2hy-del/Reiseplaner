@@ -30,6 +30,7 @@
     --green:     #30d158;
     --petrol:    #00b3b8;
     --orange:    #ff9f0a;
+    --been:      #ff9f0a;   /* besuchte Länder – bewusst anders als das Blau der Reisen */
     --spring:    cubic-bezier(0.34, 1.35, 0.64, 1);
     --ease-ios:  cubic-bezier(0.32, 0.72, 0, 1);
     --r-card:    28px;
@@ -85,34 +86,35 @@
 
   /* Weltkarte "Wo ich schon war" */
   .world-card { padding: 0; overflow: hidden; position: relative; }
-  .wm-add { position: absolute; top: 10px; right: 10px; z-index: 2; width: 32px; height: 32px; border-radius: 99px; border: 1px solid var(--stroke); background: rgba(28,28,30,0.8); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); color: var(--accent); font-size: 1.05rem; font-weight: 600; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--spring), background 0.2s; }
-  .wm-add:active { transform: scale(0.88); background: rgba(10,132,255,0.18); }
+  .wm-add { position: absolute; top: 10px; right: 10px; z-index: 2; width: 32px; height: 32px; border-radius: 99px; border: 1px solid var(--stroke); background: rgba(28,28,30,0.8); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); color: var(--been); font-size: 1.05rem; font-weight: 600; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--spring), background 0.2s; }
+  .wm-add:active { transform: scale(0.88); background: rgba(255,159,10,0.18); }
   .wm-map { padding: 14px 12px 6px; }
   .wm-svg { width: 100%; height: auto; display: block; }
   .wm-svg path[onclick] { cursor: pointer; }
   .wm-stats { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 22px 16px; border-top: 1px solid var(--stroke); }
   .wm-stat { min-width: 64px; text-align: center; }
-  .wm-val { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1; }
+  .wm-val { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; color: var(--been); font-variant-numeric: tabular-nums; line-height: 1; }
   .wm-pct { font-size: 0.9rem; font-weight: 700; margin-left: 1px; }
   .wm-lab { font-size: 0.72rem; color: var(--muted-2); margin-top: 5px; }
   .wm-donut { width: 62px; height: 62px; flex-shrink: 0; pointer-events: none; }
   .wm-donut svg { width: 100%; height: 100%; display: block; }
 
-  /* Länder-Auswahl */
-  .picker-modal { display: flex; flex-direction: column; max-height: 86vh; }
-  .picker-count { font-size: 0.78rem; color: var(--muted-2); margin: -6px 0 12px; }
-  .picker-search { width: 100%; padding: 12px 14px; border-radius: var(--r-control); border: 1px solid var(--stroke); background: rgba(255,255,255,0.05); color: var(--text); font: inherit; font-size: 0.95rem; outline: none; -webkit-appearance: none; margin-bottom: 10px; }
-  .picker-search:focus { border-color: var(--accent); background: rgba(10,132,255,0.08); }
-  .picker-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; padding: 0 4px; }
-  .pick-row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 12px; border: none; background: transparent; color: var(--text); font: inherit; font-size: 0.92rem; text-align: left; cursor: pointer; border-radius: 12px; }
+  /* Länder-Auswahl: Vollbild – Kopf bleibt stehen, nur die Liste scrollt,
+     damit die Tastatur die Treffer nicht verdeckt. */
+  .picker-screen { display: flex; flex-direction: column; padding-bottom: 0; overflow: hidden; }
+  .picker-head { flex: 0 0 auto; }
+  .picker-search { width: 100%; padding: 12px 14px; border-radius: var(--r-control); border: 1px solid var(--stroke); background: rgba(255,255,255,0.05); color: var(--text); font: inherit; font-size: 1rem; outline: none; -webkit-appearance: none; margin-bottom: 8px; }
+  .picker-search:focus { border-color: var(--been); background: rgba(255,159,10,0.08); }
+  .picker-list { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(24px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+  .pick-row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 4px; border: none; background: transparent; color: var(--text); font: inherit; font-size: 0.95rem; text-align: left; cursor: pointer; }
   .pick-row + .pick-row { border-top: 1px solid var(--stroke); }
   .pick-row:active { background: rgba(255,255,255,0.05); }
   .pick-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pick-mark { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--stroke-hi); display: flex; align-items: center; justify-content: center; }
-  .pick-mark svg { width: 12px; height: 12px; opacity: 0; color: #06280f; }
-  .pick-row.on .pick-mark { background: var(--accent); border-color: var(--accent); }
-  .pick-row.on .pick-mark svg { opacity: 1; color: #fff; }
-  .pick-row.on .pick-name { color: var(--accent); font-weight: 600; }
+  .pick-mark svg { width: 12px; height: 12px; opacity: 0; color: #fff; }
+  .pick-row.on .pick-mark { background: var(--been); border-color: var(--been); }
+  .pick-row.on .pick-mark svg { opacity: 1; }
+  .pick-row.on .pick-name { color: var(--been); font-weight: 600; }
   .pick-empty { padding: 24px 12px; text-align: center; color: var(--muted-2); font-size: 0.85rem; }
 
   .section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-2); font-weight: 600; margin: 22px 6px 10px; }
@@ -347,18 +349,19 @@
   <div id="done-section"></div>
 </div>
 
-<!-- ============ LÄNDER-AUSWAHL ============ -->
-<div class="overlay" id="picker-overlay" onclick="if(event.target===this)closePicker()">
-  <div class="modal picker-modal" onclick="event.stopPropagation()">
-    <div class="grabber"></div>
-    <h2>Wo warst du schon?</h2>
-    <p class="picker-count" id="picker-count"></p>
-    <input class="picker-search" id="picker-search" type="search" placeholder="Land suchen …" autocomplete="off" oninput="filterPicker(this.value)">
-    <div class="picker-list" id="picker-list"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="closePicker()">Fertig</button>
+<!-- ============ LÄNDER-AUSWAHL (Vollbild, damit die Tastatur nichts verdeckt) ============ -->
+<div class="screen picker-screen" id="picker-screen">
+  <div class="picker-head">
+    <div class="screen-topbar">
+      <button class="screen-back" onclick="closePicker()">‹</button>
+      <div class="screen-title">
+        <h2>Wo warst du schon?</h2>
+        <p id="picker-count">&nbsp;</p>
+      </div>
     </div>
+    <input class="picker-search" id="picker-search" type="search" placeholder="Land suchen …" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="filterPicker(this.value)">
   </div>
+  <div class="picker-list" id="picker-list"></div>
 </div>
 
 <!-- ============ REISE-DETAIL SCREEN ============ -->
@@ -695,17 +698,15 @@ function toggleVisited(c){
   if (i>=0) visited.splice(i,1); else visited.push(key);
   saveVisited();
   renderWorldCard();
-  if ($('picker-overlay') && $('picker-overlay').classList.contains('open')) renderPickerList();
+  if ($('picker-screen') && $('picker-screen').classList.contains('open')) renderPickerList();
 }
-/* Weltkarte: besuchte Länder hervorgehoben, antippen zum Umschalten */
+/* Weltkarte: reine Anzeige – besuchte Länder in Orange. Eintragen läuft über das Plus / die Länderliste. */
 function worldMapSVG(){
   const seen = new Set(visited);
   const rest = COUNTRY_LIST.filter(c=>!seen.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
-  const hit  = COUNTRY_LIST.filter(c=>seen.has(c)).map(c=>`<path d="${COUNTRY_PATHS[c]}" fill="var(--accent)"/>`).join('');
-  // Antippbare Flächen liegen unsichtbar oben drauf
-  const taps = COUNTRY_LIST.map(c=>`<path d="${COUNTRY_PATHS[c]}" fill="transparent" onclick="toggleVisited('${c.replace(/'/g,"\\'")}')"/>`).join('');
+  const hit  = COUNTRY_LIST.filter(c=>seen.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
   return `<svg class="wm-svg" viewBox="0 40 1000 420" preserveAspectRatio="xMidYMid meet">
-    <path d="${rest}" fill="rgba(255,255,255,0.12)"/>${hit}${taps}
+    <path d="${rest}" fill="rgba(255,255,255,0.12)"/>${hit?`<path d="${hit}" fill="var(--been)"/>`:''}
   </svg>`;
 }
 function renderWorldCard(){
@@ -722,7 +723,7 @@ function renderWorldCard(){
       <div class="wm-donut">
         <svg viewBox="0 0 64 64">
           <circle cx="32" cy="32" r="${R}" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="9"/>
-          <circle cx="32" cy="32" r="${R}" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round"
+          <circle cx="32" cy="32" r="${R}" fill="none" stroke="var(--been)" stroke-width="9" stroke-linecap="round"
                   stroke-dasharray="${dash.toFixed(1)} ${(C-dash).toFixed(1)}" transform="rotate(-90 32 32)"/>
         </svg>
       </div>
@@ -731,10 +732,10 @@ function renderWorldCard(){
 }
 /* Länder-Auswahl mit Suche – für kleine Länder, die man schlecht antippen kann */
 let pickerFilter='';
-function openPicker(){ pickerFilter=''; renderPickerList(); $('picker-overlay').classList.add('open'); }
-function closePicker(){ $('picker-overlay').classList.remove('open'); }
-function filterPicker(v){ pickerFilter=(v||'').toLowerCase(); renderPickerList(true); }
-function renderPickerList(keepInput){
+function openPicker(){ pickerFilter=''; const s=$('picker-search'); if(s) s.value=''; renderPickerList(); $('picker-screen').classList.add('open'); }
+function closePicker(){ $('picker-screen').classList.remove('open'); const s=$('picker-search'); if(s) s.blur(); }
+function filterPicker(v){ pickerFilter=(v||'').toLowerCase(); renderPickerList(); }
+function renderPickerList(){
   const q = pickerFilter;
   const list = COUNTRY_LIST.filter(c=>!q || c.toLowerCase().includes(q));
   const seen = new Set(visited);
