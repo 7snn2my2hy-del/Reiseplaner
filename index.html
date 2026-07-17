@@ -125,6 +125,12 @@
   .pick-row.sub + .pick-row.sub { border-top-color: transparent; }
   .pick-row.sub .pick-mark { width: 19px; height: 19px; }
   .pick-row.sub .pick-mark svg { width: 10px; height: 10px; }
+  .pick-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  /* Dritter Zustand: Land zählt über ein Gebiet, besucht wurde es aber nicht */
+  .pick-row.via .pick-mark { border-color: var(--been); background: transparent; }
+  .pick-row.via .pick-mark svg { opacity: 1; color: var(--been); }
+  .pick-row.via .pick-name { color: var(--been); opacity: 0.62; }
+  .pick-via { font-size: 0.66rem; color: var(--muted-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pick-empty { padding: 24px 12px; text-align: center; color: var(--muted-2); font-size: 0.85rem; }
 
   /* Reiseplan-Import */
@@ -647,7 +653,7 @@ function tripMapSVG(country){
 }
 
 /* ===== DATENMODELL ===== */
-const KEYS = { trips:'rp_trips_v1', stops:'rp_stops_v1', hotels:'rp_hotels_v1', flights:'rp_flights_v1', activities:'rp_activities_v1', packing:'rp_packing_v1', todos:'rp_todos_v1', visited:'rp_visited_v1', autoTrips:'rp_autotrips_v1', autoParents:'rp_autoparents_v1' };
+const KEYS = { trips:'rp_trips_v1', stops:'rp_stops_v1', hotels:'rp_hotels_v1', flights:'rp_flights_v1', activities:'rp_activities_v1', packing:'rp_packing_v1', todos:'rp_todos_v1', visited:'rp_visited_v1', autoTrips:'rp_autotrips_v1' };
 let trips      = safeParse(store.get(KEYS.trips), []);
 let stops      = safeParse(store.get(KEYS.stops), []);
 let hotels     = safeParse(store.get(KEYS.hotels), []);
@@ -657,9 +663,6 @@ let packing    = safeParse(store.get(KEYS.packing), []);
 let todos      = safeParse(store.get(KEYS.todos), []);
 let visited    = safeParse(store.get(KEYS.visited), []);
 let autoTrips  = safeParse(store.get(KEYS.autoTrips), []);
-/* Hauptländer, die NUR automatisch wegen eines Gebiets dazukamen.
-   Nötig, um beim Abwählen des Gebiets zu wissen, ob das Land wieder weg muss. */
-let autoParents = new Set(safeParse(store.get(KEYS.autoParents), []));
 const DATA = { trip:['trips',KEYS.trips], stop:['stops',KEYS.stops], hotel:['hotels',KEYS.hotels], flight:['flights',KEYS.flights], activity:['activities',KEYS.activities], photo:['activities',KEYS.activities], pack:['packing',KEYS.packing], todo:['todos',KEYS.todos] };
 const REFS = { trips:()=>trips, stops:()=>stops, hotels:()=>hotels, flights:()=>flights, activities:()=>activities, packing:()=>packing, todos:()=>todos };
 function arr(type){ return REFS[DATA[type][0]](); }
@@ -749,7 +752,7 @@ function showToast(label){ const t=$('toast'); $('toast-label').textContent=labe
 
 
 /* ===== BESUCHTE LÄNDER (Weltkarte auf der Startseite) ===== */
-function saveVisited(){ store.set(KEYS.visited, JSON.stringify(visited)); store.set(KEYS.autoParents, JSON.stringify([...autoParents])); }
+function saveVisited(){ store.set(KEYS.visited, JSON.stringify(visited)); }
 /* Abgeschlossene Reisen tragen ihr Land automatisch als besucht ein.
    Jede Reise wird nur EINMAL verarbeitet – entfernst du ein Land später von Hand,
    kommt es nicht wieder zurück. */
@@ -770,53 +773,53 @@ function syncVisitedFromTrips(){
   }
   return [];
 }
-/* Grundgedanke: Ein Gebiet IST sein Hauptland (Réunion ist Frankreich).
-   Daraus folgt die Logik in beide Richtungen. */
+/* visited enthält AUSSCHLIESSLICH das, was du selbst angehakt hast.
+   Kein automatisches Mitmarkieren – sonst stünde da "China besucht", nur weil
+   du in Hongkong warst. */
 function toggleVisited(c){
   const key = resolveCountry(c); if(!key) return;
-  const raus = (n) => { const j = visited.indexOf(n); if (j>=0) visited.splice(j,1); autoParents.delete(n); };
   const i = visited.indexOf(key);
-
-  if (i >= 0) {
-    // ---- ABWÄHLEN ----
-    raus(key);
-    const parent = TERRITORY_PARENT[key];
-    if (parent && autoParents.has(parent)) {
-      // Das Hauptland kam nur wegen eines Gebiets dazu. Es fliegt wieder raus,
-      // sobald kein Gebiet dieses Landes mehr markiert ist.
-      const nochEins = (PARENT_TERRITORIES[parent] || []).some(t => visited.includes(t));
-      if (!nochEins) raus(parent);
-    }
-    // Ein Hauptland abwählen entfernt auch seine Gebiete – warst du nicht in
-    // Frankreich, warst du auch nicht auf Réunion.
-    for (const t of (PARENT_TERRITORIES[key] || [])) raus(t);
-  } else {
-    // ---- AUSWÄHLEN ----
-    visited.push(key);
-    autoParents.delete(key);   // bewusst gewählt, also nicht mehr "automatisch"
-    const parent = TERRITORY_PARENT[key];
-    if (parent && !visited.includes(parent)) { visited.push(parent); autoParents.add(parent); }
-  }
+  if (i >= 0) visited.splice(i,1); else visited.push(key);
   saveVisited();
   renderWorldCard();
   if ($('picker-screen') && $('picker-screen').classList.contains('open')) renderPickerList();
 }
+/* Welche der 195 Länder sind abgedeckt? Ein Gebiet deckt sein Hauptland ab
+   (Hongkong -> China), ohne dass China als besucht gilt. Mehrfachnennung
+   fällt weg: Turks + Großbritannien bleibt EIN Land. */
+function countedCountries(){
+  const s = new Set();
+  for (const c of visited) {
+    if (isSovereign(c)) s.add(c);
+    else { const p = TERRITORY_PARENT[c]; if (p) s.add(p); }
+  }
+  return s;
+}
+/* Länder, die nur über ein Gebiet zählen – dort warst du selbst nicht. */
+function impliedCountries(){
+  const s = countedCountries();
+  for (const c of visited) s.delete(c);
+  return s;
+}
 /* Weltkarte: reine Anzeige – besuchte Länder in Orange. Eintragen läuft über das Plus / die Länderliste. */
 function worldMapSVG(){
-  const seen = new Set(visited);
-  const rest = COUNTRY_LIST.filter(c=>!seen.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
+  const seen = new Set(visited);           // selbst angehakt -> volles Orange
+  const impl = impliedCountries();         // zählt nur über ein Gebiet -> blasses Orange
+  const rest = COUNTRY_LIST.filter(c=>!seen.has(c) && !impl.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
+  const wach = COUNTRY_LIST.filter(c=>impl.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
   const hit  = COUNTRY_LIST.filter(c=>seen.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
   // Ausschnitt aus den Daten gemessen: Land reicht von y=17.8 (Nordgrönland)
   // bis y=412.3 (Südgeorgien), plus 6 Einheiten Luft ringsum -> vertikal mittig, nichts abgeschnitten.
   return `<svg class="wm-svg" viewBox="0 11.8 1000 406.5" preserveAspectRatio="xMidYMid meet">
-    <path d="${rest}" fill="rgba(255,255,255,0.12)"/>${hit?`<path d="${hit}" fill="var(--been)"/>`:''}
+    <path d="${rest}" fill="rgba(255,255,255,0.12)"/>
+    ${wach?`<path d="${wach}" fill="var(--been)" fill-opacity="0.32"/>`:''}
+    ${hit?`<path d="${hit}" fill="var(--been)"/>`:''}
   </svg>`;
 }
 function renderWorldCard(){
   const el = $('world-card'); if(!el) return;
-  // Gezählt werden nur echte Staaten. Gebiete (Grönland, Réunion, Taiwan …) werden
-  // auf der Karte hervorgehoben, zählen aber weder beim Zähler noch bei den Prozenten.
-  const staaten = visited.filter(isSovereign).length;
+  // Gezählt wird pro Land, nicht pro Anhaken: Turks + Großbritannien = ein Land.
+  const staaten = countedCountries().size;
   const pct = Math.min(100, Math.round(staaten / WORLD_TOTAL * 100));
   const R = 26, C = 2*Math.PI*R;
   const dash = Math.max(0, Math.min(1, staaten/WORLD_TOTAL)) * C;
@@ -843,15 +846,20 @@ function filterPicker(v){ pickerFilter=(v||'').toLowerCase(); renderPickerList()
 function renderPickerList(){
   const q = pickerFilter;
   const seen = new Set(visited);
-  const st = visited.filter(isSovereign).length;
-  const geb = visited.length - st;
+  const st = countedCountries().size;
+  const geb = visited.filter(c=>!isSovereign(c)).length;
   $('picker-count').textContent = `${st} von ${WORLD_TOTAL} Ländern` + (geb? ` · ${geb} Gebiet${geb===1?'':'e'}` : '');
 
-  const zeile = (c, sub, last) => `
-    <button class="pick-row${sub?' sub':''}${last?' last':''}${seen.has(c)?' on':''}" onclick="toggleVisited('${c.replace(/'/g,"\\'")}')">
-      <span class="pick-name">${esc(c)}</span>
+  const impl = impliedCountries();
+  const zeile = (c, sub, last) => {
+    const via = !seen.has(c) && impl.has(c);
+    const woher = via ? (PARENT_TERRITORIES[c]||[]).filter(t=>seen.has(t)) : [];
+    return `
+    <button class="pick-row${sub?' sub':''}${last?' last':''}${seen.has(c)?' on':''}${via?' via':''}" onclick="toggleVisited('${c.replace(/'/g,"\\'")}')">
+      <span class="pick-text"><span class="pick-name">${esc(c)}</span>${woher.length?`<span class="pick-via">zählt über ${esc(woher.join(', '))}</span>`:''}</span>
       <span class="pick-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
     </button>`;
+  };
 
   let html;
   if (q) {
@@ -1556,7 +1564,7 @@ async function deleteCurrentEntry(){
 }
 
 /* ===== BACKUP (Payload) – von Cloud-Backup genutzt ===== */
-function buildBackupPayload(){ return { app:'reiseplaner', version:1, exportedAt:new Date().toISOString(), trips, stops, hotels, flights, activities, packing, todos, visited, autoTrips, autoParents:[...autoParents] }; }
+function buildBackupPayload(){ return { app:'reiseplaner', version:1, exportedAt:new Date().toISOString(), trips, stops, hotels, flights, activities, packing, todos, visited, autoTrips }; }
 async function buildBackupPayloadFull(){ const base=buildBackupPayload(); if(idbReady) base.imageStore = await idbAll(); return base; }
 async function applyBackup(rawText){
   let p; try { p=JSON.parse(rawText); } catch(e){ notify('Das ist keine gültige Backup-Datei.'); return; }
@@ -1566,7 +1574,6 @@ async function applyBackup(rawText){
   trips=p.trips||[]; stops=p.stops||[]; hotels=p.hotels||[]; flights=p.flights||[]; activities=p.activities||[]; packing=p.packing||[]; todos=p.todos||[];
   visited=Array.isArray(p.visited)?p.visited:[]; store.set(KEYS.visited, JSON.stringify(visited));
   autoTrips=Array.isArray(p.autoTrips)?p.autoTrips:[]; store.set(KEYS.autoTrips, JSON.stringify(autoTrips));
-  autoParents=new Set(Array.isArray(p.autoParents)?p.autoParents:[]); store.set(KEYS.autoParents, JSON.stringify([...autoParents]));
   ['trip','stop','hotel','flight','activity','pack','todo'].forEach(persist);
   if (idbReady) { await idbClear(); if (Array.isArray(p.imageStore)) { for (const rec of p.imageStore) { if (rec && rec.id) await idbPut(rec.id, rec.data); } } }
   await migrateInlineImages();
