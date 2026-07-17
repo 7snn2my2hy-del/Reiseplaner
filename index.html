@@ -208,6 +208,29 @@
 
   /* Listen-Einträge (Detail-Tabs) */
   .list { display: flex; flex-direction: column; gap: 10px; }
+  /* ===== ROUTE ALS ZEITLEISTE ===== */
+  .rt-list { margin-top: 4px; }
+  .rt-row { display: grid; grid-template-columns: 38px 22px 1fr; align-items: start; cursor: pointer; transition: transform 0.3s var(--spring); }
+  .rt-row:active { transform: scale(0.99); }
+  /* Datumsspalte */
+  .rt-date { display: flex; flex-direction: column; align-items: center; padding-top: 1px; }
+  .rt-day { font-size: 1.12rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1.05; }
+  .rt-mon { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted-2); margin-top: 1px; }
+  /* Linie mit Punkt */
+  .rt-line { position: relative; align-self: stretch; display: flex; justify-content: center; }
+  .rt-line::before { content: ""; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--stroke-hi); }
+  .rt-row.last .rt-line::before { bottom: auto; height: 9px; }
+  .rt-dot { position: relative; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); margin-top: 4px; box-shadow: 0 0 0 4px var(--bg); }
+  .rt-row.last .rt-dot { background: var(--petrol); }
+  /* Inhalt */
+  .rt-body { min-width: 0; padding: 0 2px 24px 8px; }
+  .rt-row.last .rt-body { padding-bottom: 6px; }
+  .rt-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+  .rt-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; font-size: 0.76rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .rt-nights { padding: 2px 7px; border-radius: 99px; background: rgba(0,179,184,0.15); color: var(--petrol); font-weight: 600; font-size: 0.7rem; }
+  .rt-hotel { margin-top: 6px; font-size: 0.78rem; color: var(--violet); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rt-notes { margin-top: 6px; font-size: 0.79rem; color: var(--muted-2); line-height: 1.45; }
+
   .entry { position: relative; padding: 16px 18px; border-radius: var(--r-entry); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease, transform 0.3s var(--spring); }
   .entry:active { transform: scale(0.98); }
   .entry:hover { border-color: var(--stroke-hi); background: var(--glass-hi); }
@@ -243,6 +266,12 @@
   .ov-cd-sub { font-size: 0.8rem; color: var(--muted-2); margin-top: 8px; }
   .ov-map { flex: 0 0 40%; max-width: 150px; height: 104px; opacity: 0.9; pointer-events: none; -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 55%, transparent 100%); }
   .ov-map svg { width: 100%; height: 100%; display: block; }
+  /* Zeitraum + Dauer: eigene Zeile zwischen Countdown und Zahlen */
+  .ov-when { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--stroke); font-variant-numeric: tabular-nums; }
+  .ov-when-range { font-size: 0.9rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .ov-when-dot { color: var(--muted-2); }
+  .ov-when-dur { font-size: 0.9rem; font-weight: 600; color: var(--petrol); }
+  .ov-when + .ov-stats { margin-top: 14px; }
   .ov-stats { display: flex; align-items: stretch; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--stroke); }
   .stat { flex: 1; padding: 4px 6px 10px; text-align: center; position: relative; min-width: 0; }
   .stat + .stat::before { content: ""; position: absolute; left: 0; top: 6%; height: 72%; width: 1px; background: var(--stroke); }
@@ -304,7 +333,9 @@
   .motive-item::before { content: '›'; position: absolute; left: 2px; color: var(--violet); }
 
   /* Overlay / Modal */
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 200; align-items: flex-end; justify-content: center; padding: 0; }
+  /* Ebenen: Seiten 400 < Formulare 500 < Dialoge 600 < Toast 650 < Sperre 700.
+     Formulare MÜSSEN über den Seiten liegen – sonst öffnen sie sich unsichtbar dahinter. */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 500; align-items: flex-end; justify-content: center; padding: 0; }
   .overlay.open { display: flex; }
   #dialog-overlay { z-index: 600; }
   .modal { background: rgba(30, 30, 34, 0.68); -webkit-backdrop-filter: blur(48px) saturate(190%); backdrop-filter: blur(48px) saturate(190%); border: 1px solid var(--stroke-hi); border-bottom: none; border-radius: 34px 34px 0 0; box-shadow: 0 1.5px 1px rgba(255,255,255,0.12) inset, 0 -20px 60px rgba(0,0,0,0.4); padding: 26px 22px calc(26px + env(safe-area-inset-bottom)); width: 100%; max-width: 720px; max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: slideUp 0.45s var(--spring); }
@@ -1196,10 +1227,9 @@ function renderTripScreen(){
   const t = currentTrip();
   if (!t) { closeTripScreen(); return; }
   $('ts-name').textContent = t.name;
-  const land = t.country || t.destination || '';
-  const range = (t.start || t.end) ? `${fmtDate(t.start)||'?'} – ${fmtDate(t.end)||'?'}` : '';
-  const dur = tripDuration(t);
-  $('ts-dest').textContent = [land, range, dur].filter(Boolean).join(' · ') || '\u00A0';
+  // Zeitraum und Dauer stehen in der Übersichtskarte – hier bleibt nur das Land,
+  // sonst bricht die Kopfzeile auf zwei Zeilen um.
+  $('ts-dest').textContent = t.country || t.destination || '\u00A0';
   $('tab-bar').innerHTML = TABS.map(([k,l]) => `<button class="tab-btn ${activeTab===k?'active':''}" onclick="switchTab('${k}')">${l}</button>`).join('');
   renderTabContent();
 }
@@ -1221,7 +1251,9 @@ function renderOverviewTab(t){
     else { big='Unterwegs'; sub=(t.end&&todayISO()>t.end)?'Reise abgeschlossen':'Reise läuft'; }
   }
   const map = t.country ? tripMapSVG(t.country) : '';
-  // Eine Karte: Countdown + Weltkarte oben, Stats darunter
+  const range = (t.start || t.end) ? `${fmtDate(t.start)||'?'} – ${fmtDate(t.end)||'?'}` : '';
+  const dur = tripDuration(t);
+  // Eine Karte: Countdown + Weltkarte oben, Zeitraum darunter, dann die Zahlen
   const hero = `<div class="glass ov-card">
     <div class="ov-top">
       <div class="ov-cd">
@@ -1231,6 +1263,11 @@ function renderOverviewTab(t){
       </div>
       ${map ? `<div class="ov-map">${map}</div>` : ''}
     </div>
+    ${(range||dur) ? `<div class="ov-when">
+      ${range ? `<span class="ov-when-range">${esc(range)}</span>` : ''}
+      ${(range&&dur) ? `<span class="ov-when-dot">·</span>` : ''}
+      ${dur ? `<span class="ov-when-dur">${esc(dur)}</span>` : ''}
+    </div>` : ''}
     <div class="ov-stats">
       <div class="stat"><div class="stat-label">Flüge</div><div class="stat-value">${c('flight')}</div></div>
       <div class="stat"><div class="stat-label">Hotels</div><div class="stat-value">${c('hotel')}</div></div>
@@ -1242,11 +1279,40 @@ function renderOverviewTab(t){
 }
 function stopLabel(id){ const s=stops.find(x=>x.id===id); return s?s.name:''; }
 
+/* Route als Zeitleiste: durchgehende Linie, Punkt je Stopp, Datum als eigene Spalte */
+function nightsBetween(a, b){
+  if(!a || !b) return 0;
+  const d1=new Date(a+'T00:00:00'), d2=new Date(b+'T00:00:00');
+  if(isNaN(d1)||isNaN(d2)) return 0;
+  return Math.max(0, Math.round((d2-d1)/86400000));
+}
 function renderRouteTab(t){
   const list = stops.filter(s=>s.tripId===t.id).sort((a,b)=>(a.arrival||'9999').localeCompare(b.arrival||'9999'));
-  const body = list.length ? `<div class="list">${list.map(s=>`<div class="entry" onclick="openModal('stop','${s.id}')"><div class="entry-main"><div class="entry-name">${esc(s.name)}</div>${(s.arrival||s.departure)?`<div class="entry-sub">${fmtDate(s.arrival)||'?'} – ${fmtDate(s.departure)||'?'}</div>`:''}${s.notes?`<div class="entry-sub">${esc(s.notes)}</div>`:''}</div></div>`).join('')}</div>`
-    : `<div class="empty glass"><b>Noch keine Stopps</b>Leg die Route deiner Reise fest – jeder Stopp kann eigene Hotels und Aktivitäten haben.</div>`;
-  return body + `<button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
+  if(!list.length) return `<div class="empty glass"><b>Noch keine Stopps</b>Leg die Route deiner Reise fest – jeder Stopp kann eigene Hotels und Aktivitäten haben.</div>`
+    + `<button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
+
+  const body = list.map((s, i) => {
+    const n = nightsBetween(s.arrival, s.departure);
+    const tag = s.arrival ? new Date(s.arrival+'T00:00:00') : null;
+    const kopf = tag && !isNaN(tag)
+      ? `<span class="rt-day">${String(tag.getDate()).padStart(2,'0')}</span><span class="rt-mon">${['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][tag.getMonth()]}</span>`
+      : `<span class="rt-day">–</span>`;
+    const hotelsHier = hotels.filter(h=>h.tripId===t.id && (h.address||'').toLowerCase().includes(s.name.toLowerCase()));
+    return `<div class="rt-row${i===list.length-1?' last':''}" onclick="openModal('stop','${s.id}')">
+      <div class="rt-date">${kopf}</div>
+      <div class="rt-line"><span class="rt-dot"></span></div>
+      <div class="rt-body">
+        <div class="rt-name">${esc(s.name)}</div>
+        <div class="rt-meta">
+          ${(s.arrival||s.departure)?`<span>${fmtDate(s.arrival)||'?'} – ${fmtDate(s.departure)||'?'}</span>`:''}
+          ${n?`<span class="rt-nights">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
+        </div>
+        ${hotelsHier.length?`<div class="rt-hotel">${hotelsHier.map(h=>esc(h.name)).join(' · ')}</div>`:''}
+        ${s.notes?`<div class="rt-notes">${esc(s.notes)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="rt-list">${body}</div><button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
 }
 function renderHotelsTab(t){
   const list = hotels.filter(s=>s.tripId===t.id).sort((a,b)=>(a.checkin||'9999').localeCompare(b.checkin||'9999'));
