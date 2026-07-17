@@ -803,17 +803,15 @@ function impliedCountries(){
 }
 /* Weltkarte: reine Anzeige – besuchte Länder in Orange. Eintragen läuft über das Plus / die Länderliste. */
 function worldMapSVG(){
-  const seen = new Set(visited);           // selbst angehakt -> volles Orange
-  const impl = impliedCountries();         // zählt nur über ein Gebiet -> blasses Orange
-  const rest = COUNTRY_LIST.filter(c=>!seen.has(c) && !impl.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
-  const wach = COUNTRY_LIST.filter(c=>impl.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
+  // Die Karte zeigt ausschließlich, wo du selbst warst. Ein Land, das nur über ein
+  // Gebiet zählt (China wegen Hongkong), bleibt grau – sonst behauptet die Karte etwas Falsches.
+  const seen = new Set(visited);
+  const rest = COUNTRY_LIST.filter(c=>!seen.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
   const hit  = COUNTRY_LIST.filter(c=>seen.has(c)).map(c=>COUNTRY_PATHS[c]).join('');
   // Ausschnitt aus den Daten gemessen: Land reicht von y=17.8 (Nordgrönland)
   // bis y=412.3 (Südgeorgien), plus 6 Einheiten Luft ringsum -> vertikal mittig, nichts abgeschnitten.
   return `<svg class="wm-svg" viewBox="0 11.8 1000 406.5" preserveAspectRatio="xMidYMid meet">
-    <path d="${rest}" fill="rgba(255,255,255,0.12)"/>
-    ${wach?`<path d="${wach}" fill="var(--been)" fill-opacity="0.32"/>`:''}
-    ${hit?`<path d="${hit}" fill="var(--been)"/>`:''}
+    <path d="${rest}" fill="rgba(255,255,255,0.12)"/>${hit?`<path d="${hit}" fill="var(--been)"/>`:''}
   </svg>`;
 }
 function renderWorldCard(){
