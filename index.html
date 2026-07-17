@@ -137,6 +137,9 @@
   .ts-import { font-size: 1.05rem; font-weight: 600; color: var(--accent); }
   .ts-import:active { transform: scale(0.88); }
   .import-hint { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 4px 2px 14px; }
+  .import-warn { font-size: 0.8rem; color: var(--orange); background: rgba(255,159,10,0.1); border: 1px solid rgba(255,159,10,0.25); border-radius: 14px; padding: 11px 13px; margin: -6px 0 14px; line-height: 1.45; }
+  .imp-row.dup .imp-name { color: var(--muted-2); }
+  .imp-dup { color: var(--orange); font-weight: 600; }
   .import-err { font-size: 0.82rem; color: var(--danger); background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.25); border-radius: 14px; padding: 11px 13px; margin-bottom: 12px; line-height: 1.45; }
   .import-input { width: 100%; min-height: 190px; padding: 13px 14px; border-radius: 18px; border: 1px solid var(--stroke); background: rgba(255,255,255,0.05); color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; line-height: 1.45; outline: none; resize: vertical; -webkit-appearance: none; }
   .import-input:focus { border-color: var(--accent); background: rgba(10,132,255,0.06); }
@@ -168,6 +171,13 @@
   .tile-slider { display: flex; flex-direction: row; width: 100%; transition: transform 0.42s var(--spring); will-change: transform; }
   .tile-slider.no-transition { transition: none; }
   .tile-slider .trip-tile { flex: 0 0 100%; width: 100%; }
+  /* Einträge (Hotels, Flüge, Stopps …) nutzen dieselbe Swipe-Mechanik wie die Reisekacheln */
+  .tile-slider .entry, .tile-slider .rt-row { flex: 0 0 100%; width: 100%; }
+  .entry-wrap { border-radius: var(--r-entry); }
+  .list .entry-wrap .entry { margin: 0; }
+  /* In der Zeitleiste darf nichts abgeschnitten werden, die Linie läuft durch */
+  .rt-list .entry-wrap { border-radius: 0; overflow: visible; }
+  .rt-list .tile-wrap { overflow: hidden; }
   .tile-action-bg { display: flex; flex-direction: row; align-items: center; gap: 6px; padding: 6px 0 6px 6px; flex-shrink: 0; background: transparent; }
   .swipe-edit, .swipe-del { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 64px; align-self: stretch; border-radius: 18px; color: #fff; cursor: pointer; flex-shrink: 0; transition: transform 0.3s var(--spring); }
   .swipe-edit:active, .swipe-del:active { transform: scale(0.92); }
@@ -228,7 +238,6 @@
   .rt-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
   .rt-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; font-size: 0.76rem; color: var(--muted); font-variant-numeric: tabular-nums; }
   .rt-nights { padding: 2px 7px; border-radius: 99px; background: rgba(0,179,184,0.15); color: var(--petrol); font-weight: 600; font-size: 0.7rem; }
-  .rt-hotel { margin-top: 6px; font-size: 0.78rem; color: var(--violet); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rt-notes { margin-top: 6px; font-size: 0.79rem; color: var(--muted-2); line-height: 1.45; }
 
   .entry { position: relative; padding: 16px 18px; border-radius: var(--r-entry); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease, transform 0.3s var(--spring); }
@@ -985,8 +994,22 @@ function parseImport(){
       if(fehlt.length) continue;
       const label = type==='flight' ? `${obj.from} → ${obj.to}` : obj.name;
       const datum = obj.date||obj.checkin||obj.arrival||'';
+      // Schon vorhanden? Gleicher Name (und Datum, falls vorhanden) in derselben Reise.
+      // Dann nicht vorauswählen – sonst legt ein zweiter Import alles doppelt an.
+      const t = currentTrip();
+      const doppelt = arr(type).some(x => {
+        if (x.tripId !== t.id) return false;
+        if (type==='photo' && x.type!=='foto') return false;
+        if (type==='activity' && x.type==='foto') return false;
+        const gleich = type==='flight'
+          ? (x.from===obj.from && x.to===obj.to)
+          : ((x.name||'').trim().toLowerCase() === (obj.name||'').trim().toLowerCase());
+        if (!gleich) return false;
+        const xd = x.date||x.checkin||x.arrival||'';
+        return !datum || !xd || xd===datum;
+      });
       const sub = [titel, datum?fmtDate(datum):'', obj.time?obj.time+' Uhr':''].filter(Boolean).join(' · ');
-      importItems.push({ type, label, sub, data:obj, on:true });
+      importItems.push({ type, label, sub, data:obj, on:!doppelt, doppelt });
     }
   }
   if(!importItems.length){ renderImportStep1('Im Datenblock konnte ich nichts finden, was ich eintragen kann.'); return; }
@@ -997,14 +1020,16 @@ function renderImportStep2(){
   const gruppen={};
   importItems.forEach((it,i)=>{ (gruppen[it.type]=gruppen[it.type]||[]).push(i); });
   const titel={ '__meta':'Reisedaten', stop:'Stopps', flight:'Flüge', hotel:'Hotels', activity:'Aktivitäten', photo:'Fotografie', pack:'Packliste', todo:'Checkliste' };
-  let html=`<p class="import-hint">${importItems.length} Einträge erkannt. Hake ab, was übernommen werden soll.</p>`;
+  const dop = importItems.filter(i=>i.doppelt).length;
+  let html=`<p class="import-hint">${importItems.length} Einträge erkannt. Hake ab, was übernommen werden soll.</p>`
+    + (dop?`<div class="import-warn">${dop} ${dop===1?'Eintrag ist':'Einträge sind'} in dieser Reise schon vorhanden und ${dop===1?'wurde':'wurden'} abgewählt. Ankreuzen legt ${dop===1?'ihn':'sie'} ein zweites Mal an.</div>`:'');
   for(const [type,idx] of Object.entries(gruppen)){
     html+=`<div class="section-label">${titel[type]||type} <span class="sl-count">${idx.length}</span></div><div class="import-list">`;
     for(const i of idx){
       const it=importItems[i];
-      html+=`<button class="imp-row${it.on?' on':''}" onclick="toggleImport(${i})">
+      html+=`<button class="imp-row${it.on?' on':''}${it.doppelt?' dup':''}" onclick="toggleImport(${i})">
         <span class="imp-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
-        <span class="imp-text"><span class="imp-name">${esc(it.label)}</span><span class="imp-sub">${esc(it.sub)}</span></span>
+        <span class="imp-text"><span class="imp-name">${esc(it.label)}</span><span class="imp-sub">${esc(it.sub)}${it.doppelt?' · <b class="imp-dup">schon vorhanden</b>':''}</span></span>
       </button>`;
     }
     html+='</div>';
@@ -1088,6 +1113,42 @@ function tripTileHTML(t, done){
     </div>
   </div>`;
 }
+/* Hüllt einen beliebigen Eintrag in die Swipe-Mechanik (wie die Reisekacheln):
+   nach links wischen -> Bearbeiten + Löschen. Ein Ort für alle Kategorien. */
+function swipeWrap(type, id, inner){
+  return `<div class="tile-wrap entry-wrap" data-id="${id}" data-type="${type}">
+    <div class="tile-slider">
+      ${inner}
+      <div class="tile-action-bg">
+        <div class="swipe-edit">${ICON_EDIT}<span>Bearb.</span></div>
+        <div class="swipe-del">${ICON_DEL}<span>Lösch.</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+/* Löscht einen Eintrag nach Rückfrage – inkl. Bildern aus der Datenbank */
+async function deleteEntryById(type, id){
+  const e = arr(type).find(x=>x.id===id); if(!e) return;
+  const was = type==='flight' ? `${e.from} → ${e.to}` : e.name;
+  const ok = await showDialog('Der Eintrag wird unwiderruflich gelöscht.', { title:`„${was}" löschen?`, okText:'Löschen' });
+  if(!ok) return;
+  if (idbReady && e.images) for (const ref of e.images) if(!isDataUri(ref)) await idbDelete(ref);
+  const list = arr(type); const i = list.findIndex(x=>x.id===id);
+  if (i>=0) list.splice(i,1);
+  persist(type);
+  closeOpenSwipe();
+  renderTabContent(); renderHome();
+  showToast('Gelöscht');
+}
+/* Hängt die Swipe-Gesten an alle Einträge im Reiter */
+function wireEntrySwipe(){
+  const el = $('tab-content'); if(!el) return;
+  el.querySelectorAll('.entry-wrap').forEach(wrap => {
+    const id = wrap.dataset.id, type = wrap.dataset.type;
+    attachSwipeGeneric(wrap, () => deleteEntryById(type, id), () => openModal(type, id));
+  });
+}
+
 function wireSwipe(container){
   container.querySelectorAll('.tile-wrap').forEach(wrap => {
     const id = wrap.dataset.id;
@@ -1238,6 +1299,7 @@ function renderTabContent(){
   const el = $('tab-content');
   const map = { overview:renderOverviewTab, route:renderRouteTab, hotels:renderHotelsTab, flights:renderFlightsTab, activities:renderActivitiesTab, photos:renderPhotosTab, packing:renderPackingTab };
   el.innerHTML = map[activeTab](t);
+  wireEntrySwipe();
 }
 
 function renderOverviewTab(t){
@@ -1297,8 +1359,7 @@ function renderRouteTab(t){
     const kopf = tag && !isNaN(tag)
       ? `<span class="rt-day">${String(tag.getDate()).padStart(2,'0')}</span><span class="rt-mon">${['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][tag.getMonth()]}</span>`
       : `<span class="rt-day">–</span>`;
-    const hotelsHier = hotels.filter(h=>h.tripId===t.id && (h.address||'').toLowerCase().includes(s.name.toLowerCase()));
-    return `<div class="rt-row${i===list.length-1?' last':''}" onclick="openModal('stop','${s.id}')">
+    return swipeWrap('stop', s.id, `<div class="rt-row${i===list.length-1?' last':''}" onclick="openModal('stop','${s.id}')">
       <div class="rt-date">${kopf}</div>
       <div class="rt-line"><span class="rt-dot"></span></div>
       <div class="rt-body">
@@ -1307,36 +1368,35 @@ function renderRouteTab(t){
           ${(s.arrival||s.departure)?`<span>${fmtDate(s.arrival)||'?'} – ${fmtDate(s.departure)||'?'}</span>`:''}
           ${n?`<span class="rt-nights">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
         </div>
-        ${hotelsHier.length?`<div class="rt-hotel">${hotelsHier.map(h=>esc(h.name)).join(' · ')}</div>`:''}
         ${s.notes?`<div class="rt-notes">${esc(s.notes)}</div>`:''}
       </div>
-    </div>`;
+    </div>`);
   }).join('');
   return `<div class="rt-list">${body}</div><button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
 }
 function renderHotelsTab(t){
   const list = hotels.filter(s=>s.tripId===t.id).sort((a,b)=>(a.checkin||'9999').localeCompare(b.checkin||'9999'));
-  const body = list.length ? `<div class="list">${list.map(h=>{const sn=stopLabel(h.stopId);return `<div class="entry" onclick="openModal('hotel','${h.id}')"><div class="entry-main"><div class="entry-name">${esc(h.name)}</div>${(h.checkin||h.checkout)?`<div class="entry-sub">${fmtDate(h.checkin)||'?'} – ${fmtDate(h.checkout)||'?'}</div>`:''}${h.address?`<div class="entry-sub">${esc(h.address)}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">${h.price?`<div class="entry-name">${esc(h.price)}</div>`:''}</div></div>`;}).join('')}</div>`
+  const body = list.length ? `<div class="list">${list.map(h=>{const sn=stopLabel(h.stopId);return swipeWrap('hotel', h.id, `<div class="entry"><div class="entry-main"><div class="entry-name">${esc(h.name)}</div>${(h.checkin||h.checkout)?`<div class="entry-sub">${fmtDate(h.checkin)||'?'} – ${fmtDate(h.checkout)||'?'}</div>`:''}${h.address?`<div class="entry-sub">${esc(h.address)}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">${h.price?`<div class="entry-name">${esc(h.price)}</div>`:''}</div></div>`);}).join('')}</div>`
     : `<div class="empty glass"><b>Noch kein Hotel</b>Trage Hotels, Lodges oder Camps mit Check-in/-out und Buchungsdaten ein.</div>`;
   return body + `<button class="add-btn" onclick="openModal('hotel')">＋ Hotel hinzufügen</button>`;
 }
 function renderFlightsTab(t){
   const list = flights.filter(s=>s.tripId===t.id).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const body = list.length ? `<div class="list">${list.map(f=>`<div class="entry" onclick="openModal('flight','${f.id}')"><div class="entry-main"><div class="entry-name">${esc(f.from)} → ${esc(f.to)}</div>${(f.date||f.time)?`<div class="entry-sub">${fmtDate(f.date)||'?'}${f.time?' · '+esc(f.time)+' Uhr':''}</div>`:''}${(f.airline||f.flightNo)?`<div class="entry-pills"><span class="cat-pill pill-violet">${esc([f.airline,f.flightNo].filter(Boolean).join(' · '))}</span></div>`:''}</div></div>`).join('')}</div>`
+  const body = list.length ? `<div class="list">${list.map(f=>swipeWrap('flight', f.id, `<div class="entry"><div class="entry-main"><div class="entry-name">${esc(f.from)} → ${esc(f.to)}</div>${(f.date||f.time)?`<div class="entry-sub">${fmtDate(f.date)||'?'}${f.time?' · '+esc(f.time)+' Uhr':''}</div>`:''}${(f.airline||f.flightNo)?`<div class="entry-pills"><span class="cat-pill pill-violet">${esc([f.airline,f.flightNo].filter(Boolean).join(' · '))}</span></div>`:''}</div></div>`)).join('')}</div>`
     : `<div class="empty glass"><b>Noch kein Flug</b>Erfasse deine Flüge inkl. Airline, Flugnummer und Buchungsnummer.</div>`;
   return body + `<button class="add-btn" onclick="openModal('flight')">＋ Flug hinzufügen</button>`;
 }
 /* Aktivitäten: alles außer Fotografie */
 function renderActivitiesTab(t){
   const list = activities.filter(s=>s.tripId===t.id && s.type!=='foto').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);return `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">›</div></div>`;}).join('')}</div>`
+  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);return swipeWrap('activity', a.id, `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">›</div></div>`);}).join('')}</div>`
     : `<div class="empty glass"><b>Noch keine Aktivität</b>Plane Ausflüge, Touren und alles, was du unterwegs machen möchtest.</div>`;
   return body + `<button class="add-btn" onclick="openModal('activity')">＋ Aktivität hinzufügen</button>`;
 }
 /* Fotografie: eigener Bereich mit Equipment, Motiven und Referenzbildern */
 function renderPhotosTab(t){
   const list = activities.filter(s=>s.tripId===t.id && s.type==='foto').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);const n=(a.images&&a.images.length)||0;return `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}<div class="entry-pills">${sn?`<span class="cat-pill pill-blue">${esc(sn)}</span>`:''}${n?`<span class="cat-pill pill-orange">${n} Foto${n===1?'':'s'}</span>`:''}${a.equipment&&a.equipment.length?`<span class="cat-pill pill-violet">${a.equipment.length} Equipment</span>`:''}</div></div><div class="entry-right">›</div></div>`;}).join('')}</div>`
+  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);const n=(a.images&&a.images.length)||0;return swipeWrap('photo', a.id, `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}<div class="entry-pills">${sn?`<span class="cat-pill pill-blue">${esc(sn)}</span>`:''}${n?`<span class="cat-pill pill-orange">${n} Foto${n===1?'':'s'}</span>`:''}${a.equipment&&a.equipment.length?`<span class="cat-pill pill-violet">${a.equipment.length} Equipment</span>`:''}</div></div><div class="entry-right">›</div></div>`);}).join('')}</div>`
     : `<div class="empty glass"><b>Noch keine Foto-Session</b>Plane deine Shootings mit Equipment, Motiven und Referenzbildern.</div>`;
   return body + `<button class="add-btn" onclick="openModal('photo')">＋ Foto-Session hinzufügen</button>`;
 }
@@ -1450,15 +1510,15 @@ const SCHEMAS = {
   ],
   stop: [
     { key:'name', label:'Ort', type:'text', required:true, placeholder:'z.B. NamibRand' },
-    { key:'arrival', label:'Ankunft', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
-    { key:'departure', label:'Abfahrt', type:'text', date:true, placeholder:'z.B. 12.09.2026' },
+    { key:'arrival', label:'Ankunft', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
+    { key:'departure', label:'Abfahrt', type:'text', date:true, placeholder:'z.B. 12.09.2026', pair:'end' },
     { key:'notes', label:'Notizen', type:'textarea' }
   ],
   hotel: [
     { key:'name', label:'Hotel', type:'text', required:true, placeholder:'z.B. Kulala Desert Lodge' },
     { key:'stopId', label:'Stopp', type:'select-stop' },
-    { key:'checkin', label:'Check-in', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
-    { key:'checkout', label:'Check-out', type:'text', date:true, placeholder:'z.B. 12.09.2026' },
+    { key:'checkin', label:'Check-in', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
+    { key:'checkout', label:'Check-out', type:'text', date:true, placeholder:'z.B. 12.09.2026', pair:'end' },
     { key:'address', label:'Adresse', type:'text' },
     { key:'bookingRef', label:'Buchungsnummer', type:'text' },
     { key:'price', label:'Preis', type:'text', placeholder:'z.B. 240 € / Nacht' },
@@ -1467,8 +1527,8 @@ const SCHEMAS = {
   flight: [
     { key:'from', label:'Von', type:'text', required:true, placeholder:'z.B. Frankfurt (FRA)' },
     { key:'to', label:'Nach', type:'text', required:true, placeholder:'z.B. Windhoek (WDH)' },
-    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
-    { key:'time', label:'Uhrzeit', type:'time' },
+    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
+    { key:'time', label:'Uhrzeit', type:'time', pair:'end' },
     { key:'airline', label:'Airline', type:'text' },
     { key:'flightNo', label:'Flugnummer', type:'text' },
     { key:'bookingRef', label:'Buchungsnummer', type:'text' },
@@ -1477,15 +1537,15 @@ const SCHEMAS = {
   activity: [
     { key:'name', label:'Aktivität', type:'text', required:true, placeholder:'z.B. Sundowner Düne 45' },
     { key:'stopId', label:'Stopp', type:'select-stop' },
-    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
-    { key:'time', label:'Uhrzeit', type:'time' },
+    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
+    { key:'time', label:'Uhrzeit', type:'time', pair:'end' },
     { key:'notes', label:'Notizen', type:'textarea' }
   ],
   photo: [
     { key:'name', label:'Session', type:'text', required:true, placeholder:'z.B. Milchstraße über den Dünen' },
     { key:'stopId', label:'Stopp', type:'select-stop' },
-    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026' },
-    { key:'time', label:'Uhrzeit', type:'time' },
+    { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
+    { key:'time', label:'Uhrzeit', type:'time', pair:'end' },
     { key:'notes', label:'Notizen', type:'textarea' },
     { key:'equipment', label:'Equipment (Komma-getrennt)', type:'text', placeholder:'z.B. 14mm GM, Stativ, L-Bracket' },
     { key:'motives', label:'Motive (eine Zeile pro Motiv)', type:'textarea', placeholder:'z.B. Milchstraße über den Dünen' },
