@@ -172,7 +172,7 @@
   .tile-slider.no-transition { transition: none; }
   .tile-slider .trip-tile { flex: 0 0 100%; width: 100%; }
   /* Einträge (Hotels, Flüge, Stopps …) nutzen dieselbe Swipe-Mechanik wie die Reisekacheln */
-  .tile-slider .entry, .tile-slider .rt-row { flex: 0 0 100%; width: 100%; }
+  .tile-slider .entry, .tile-slider .rt-row, .tile-slider .fl-card { flex: 0 0 100%; width: 100%; }
   .entry-wrap { border-radius: var(--r-entry); }
   .list .entry-wrap .entry { margin: 0; }
   /* In der Zeitleiste darf nichts abgeschnitten werden, die Linie läuft durch */
@@ -206,6 +206,7 @@
   .pill-violet { background: rgba(191,90,242,0.16);  color: #d19bf5; }
   .pill-green  { background: rgba(48,209,88,0.16);   color: #6be08a; }
   .pill-orange { background: rgba(255,159,10,0.16);  color: #ffbb52; }
+  .pill-petrol { background: rgba(0,179,184,0.16);   color: #4fd7db; }
   .pill-muted  { background: rgba(255,255,255,0.08); color: var(--muted); }
 
   .add-btn { width: 100%; margin-top: 14px; padding: 12px; font: inherit; font-size: 0.82rem; font-weight: 500; color: var(--muted); cursor: pointer; border-radius: 99px; border: 1px solid var(--stroke); background: transparent; transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.3s var(--spring); }
@@ -231,7 +232,12 @@
   .rt-line::before { content: ""; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--stroke-hi); }
   .rt-row.last .rt-line::before { bottom: auto; height: 9px; }
   .rt-dot { position: relative; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); margin-top: 4px; box-shadow: 0 0 0 4px var(--bg); }
-  .rt-row.last .rt-dot { background: var(--petrol); }
+  /* Flüge in der Zeitleiste: Flieger statt Punkt, Violett zur Abgrenzung von den Stopps */
+  .rt-plane { position: relative; display: flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 50%; background: var(--bg); margin-top: 1px; box-shadow: 0 0 0 3px var(--bg); }
+  .rt-plane svg { width: 15px; height: 15px; color: var(--violet); transform: rotate(90deg); }
+  .rt-row.flight .rt-name { font-size: 0.92rem; font-weight: 600; color: var(--violet); }
+  .rt-row.flight .rt-body { padding-bottom: 20px; }
+  .rt-sub { margin-top: 4px; font-size: 0.72rem; color: var(--muted-2); }
   /* Inhalt */
   .rt-body { min-width: 0; padding: 0 2px 24px 8px; }
   .rt-row.last .rt-body { padding-bottom: 6px; }
@@ -239,6 +245,28 @@
   .rt-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; font-size: 0.76rem; color: var(--muted); font-variant-numeric: tabular-nums; }
   .rt-nights { padding: 2px 7px; border-radius: 99px; background: rgba(0,179,184,0.15); color: var(--petrol); font-weight: 600; font-size: 0.7rem; }
   .rt-notes { margin-top: 6px; font-size: 0.79rem; color: var(--muted-2); line-height: 1.45; }
+
+  /* ===== FLÜGE ALS BORDKARTE ===== */
+  .fl-card { position: relative; padding: 15px 18px 16px; border-radius: var(--r-entry); background: var(--glass); border: 1px solid var(--stroke); cursor: pointer; overflow: hidden; }
+  .fl-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent), var(--violet)); }
+  .fl-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .fl-date { font-size: 0.76rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .fl-ref { font-size: 0.7rem; color: var(--muted-2); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.04em; }
+  .fl-route { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+  .fl-port { min-width: 0; }
+  .fl-port.right { text-align: right; }
+  .fl-code { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .fl-city { font-size: 0.74rem; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fl-time { font-size: 0.98rem; font-weight: 700; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .fl-plus { font-size: 0.66rem; font-weight: 700; color: var(--orange); vertical-align: super; margin-left: 2px; }
+  .fl-mid { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 78px; }
+  .fl-dur { font-size: 0.68rem; color: var(--muted-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fl-line { position: relative; width: 100%; height: 16px; display: flex; align-items: center; justify-content: center; }
+  .fl-line::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: repeating-linear-gradient(90deg, var(--stroke-hi) 0 4px, transparent 4px 8px); }
+  .fl-plane { position: relative; display: flex; padding: 0 5px; background: var(--bg); }
+  .fl-plane svg { width: 13px; height: 13px; color: var(--accent); transform: rotate(90deg); }
+  .fl-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; }
+  .fl-notes { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--stroke); font-size: 0.76rem; color: var(--muted-2); line-height: 1.45; }
 
   .entry { position: relative; padding: 16px 18px; border-radius: var(--r-entry); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease, transform 0.3s var(--spring); }
   .entry:active { transform: scale(0.98); }
@@ -279,7 +307,7 @@
   .ov-when { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--stroke); font-variant-numeric: tabular-nums; }
   .ov-when-range { font-size: 0.9rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
   .ov-when-dot { color: var(--muted-2); }
-  .ov-when-dur { font-size: 0.9rem; font-weight: 600; color: var(--petrol); }
+  .ov-when-dur { font-size: 0.9rem; font-weight: 600; color: var(--text); }
   .ov-when + .ov-stats { margin-top: 14px; }
   .ov-stats { display: flex; align-items: stretch; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--stroke); }
   .stat { flex: 1; padding: 4px 6px 10px; text-align: center; position: relative; min-width: 0; }
@@ -367,13 +395,10 @@
   .f-toggle .f-toggle-cb { width: 22px; height: 22px; accent-color: var(--accent); flex: 0 0 22px; cursor: pointer; margin: 0; }
 
   .modal-actions { display: flex; gap: 10px; margin-top: 22px; }
-  .modal-actions-row { display: flex; gap: 10px; margin-top: 12px; }
   .btn { flex: 1; padding: 14px; border-radius: 99px; font: inherit; font-size: 0.97rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s, transform 0.3s var(--spring); }
   .btn:active { transform: scale(0.96); opacity: 0.88; }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--stroke); }
-  .btn-danger-ghost { flex: 0 0 auto; padding: 14px 18px; border-radius: 99px; font: inherit; font-size: 0.88rem; font-weight: 600; color: var(--danger); background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.25); cursor: pointer; transition: transform 0.3s var(--spring), opacity 0.15s; }
-  .btn-danger-ghost:active { transform: scale(0.96); opacity: 0.85; }
 
   /* Einstellungen (exakt wie Finanzen) */
   .settings-group { background: var(--glass); border: 1px solid var(--stroke); border-radius: var(--r-control); overflow: hidden; margin-top: 10px; -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
@@ -546,9 +571,6 @@
     <div class="grabber"></div>
     <h2 id="form-title">Eintrag</h2>
     <div class="field-stack" id="form-fields"></div>
-    <div class="modal-actions-row" id="form-danger-row" style="display:none">
-      <button class="btn-danger-ghost" onclick="deleteCurrentEntry()">Löschen</button>
-    </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
       <button class="btn btn-primary" onclick="saveModal()">Speichern</button>
@@ -1083,6 +1105,7 @@ function countdownParts(t){
 }
 
 /* Icons wie in der Finanzen-App */
+const ICON_PLANE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z"/></svg>';
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 const ICON_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 
@@ -1349,18 +1372,44 @@ function nightsBetween(a, b){
   return Math.max(0, Math.round((d2-d1)/86400000));
 }
 function renderRouteTab(t){
-  const list = stops.filter(s=>s.tripId===t.id).sort((a,b)=>(a.arrival||'9999').localeCompare(b.arrival||'9999'));
+  // Stopps und Flüge in einer Zeitleiste – chronologisch gemischt
+  const st = stops.filter(s=>s.tripId===t.id).map(s=>({ art:'stop', datum:s.arrival||'', zeit:'', o:s }));
+  const fl = flights.filter(f=>f.tripId===t.id).map(f=>({ art:'flight', datum:f.date||'', zeit:f.time||'', o:f }));
+  const list = [...st, ...fl].sort((a,b)=>
+    ((a.datum||'9999')+(a.zeit||'  ')).localeCompare((b.datum||'9999')+(b.zeit||'  ')));
+
   if(!list.length) return `<div class="empty glass"><b>Noch keine Stopps</b>Leg die Route deiner Reise fest – jeder Stopp kann eigene Hotels und Aktivitäten haben.</div>`
     + `<button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
 
-  const body = list.map((s, i) => {
-    const n = nightsBetween(s.arrival, s.departure);
-    const tag = s.arrival ? new Date(s.arrival+'T00:00:00') : null;
-    const kopf = tag && !isNaN(tag)
-      ? `<span class="rt-day">${String(tag.getDate()).padStart(2,'0')}</span><span class="rt-mon">${['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][tag.getMonth()]}</span>`
+  const datumsSpalte = (iso) => {
+    const d = iso ? new Date(iso+'T00:00:00') : null;
+    return (d && !isNaN(d))
+      ? `<span class="rt-day">${String(d.getDate()).padStart(2,'0')}</span><span class="rt-mon">${['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][d.getMonth()]}</span>`
       : `<span class="rt-day">–</span>`;
-    return swipeWrap('stop', s.id, `<div class="rt-row${i===list.length-1?' last':''}" onclick="openModal('stop','${s.id}')">
-      <div class="rt-date">${kopf}</div>
+  };
+
+  const body = list.map((item, i) => {
+    const last = i===list.length-1;
+    if (item.art === 'flight') {
+      const f = item.o, a = splitAirport(f.from), b = splitAirport(f.to);
+      const plus = nextDayArrival(f);
+      return swipeWrap('flight', f.id, `<div class="rt-row flight${last?' last':''}" onclick="openModal('flight','${f.id}')">
+        <div class="rt-date">${datumsSpalte(f.date)}</div>
+        <div class="rt-line"><span class="rt-plane">${ICON_PLANE}</span></div>
+        <div class="rt-body">
+          <div class="rt-name">${esc(a.code||a.city)} → ${esc(b.code||b.city)}</div>
+          <div class="rt-meta">
+            ${f.time?`<span>${esc(f.time)}${f.arrivalTime?' – '+esc(f.arrivalTime)+(plus?' +1':''):''} Uhr</span>`:''}
+            ${f.duration?`<span class="rt-nights">${esc(f.duration)}</span>`:''}
+          </div>
+          ${(f.airline||f.flightNo)?`<div class="rt-sub">${esc([f.airline,f.flightNo].filter(Boolean).join(' · '))}</div>`:''}
+        </div>
+      </div>`);
+    }
+    const s = item.o;
+    const n = nightsBetween(s.arrival, s.departure);
+    return swipeWrap('stop', s.id, `<div class="rt-row${last?' last':''}" onclick="openModal('stop','${s.id}')">
+      <div class="rt-date">${datumsSpalte(s.arrival)}</div>
       <div class="rt-line"><span class="rt-dot"></span></div>
       <div class="rt-body">
         <div class="rt-name">${esc(s.name)}</div>
@@ -1380,9 +1429,53 @@ function renderHotelsTab(t){
     : `<div class="empty glass"><b>Noch kein Hotel</b>Trage Hotels, Lodges oder Camps mit Check-in/-out und Buchungsdaten ein.</div>`;
   return body + `<button class="add-btn" onclick="openModal('hotel')">＋ Hotel hinzufügen</button>`;
 }
+/* Zerlegt "Frankfurt (FRA)" in Kürzel und Stadt. Ohne Klammern bleibt alles Stadt. */
+function splitAirport(s){
+  const t = String(s||'').trim();
+  const m = t.match(/^(.*?)\s*\(([A-Za-z]{3})\)\s*$/);
+  return m ? { city:m[1].trim(), code:m[2].toUpperCase() } : { city:t, code:'' };
+}
+/* Landet die Ankunft am Folgetag? Heuristik: Ankunftszeit liegt vor der Abflugzeit. */
+function nextDayArrival(f){
+  if(!f.time || !f.arrivalTime) return false;
+  return f.arrivalTime < f.time;
+}
+function flightCardHTML(f){
+  const a = splitAirport(f.from), b = splitAirport(f.to);
+  const plus = nextDayArrival(f);
+  const pills = [
+    f.cabin  ? `<span class="cat-pill pill-blue">${esc(f.cabin)}</span>` : '',
+    f.seat   ? `<span class="cat-pill pill-violet">Sitz ${esc(f.seat)}</span>` : '',
+    f.airline||f.flightNo ? `<span class="cat-pill pill-petrol">${esc([f.airline,f.flightNo].filter(Boolean).join(' · '))}</span>` : ''
+  ].filter(Boolean).join('');
+  return `<div class="fl-card">
+    <div class="fl-head">
+      <span class="fl-date">${f.date?esc(fmtDate(f.date)):'Kein Datum'}</span>
+      ${f.bookingRef?`<span class="fl-ref">Buchung ${esc(f.bookingRef)}</span>`:''}
+    </div>
+    <div class="fl-route">
+      <div class="fl-port">
+        <div class="fl-code">${esc(a.code||a.city.slice(0,3).toUpperCase()||'—')}</div>
+        <div class="fl-city">${esc(a.city)||'&nbsp;'}</div>
+        <div class="fl-time">${f.time?esc(f.time):'—'}</div>
+      </div>
+      <div class="fl-mid">
+        <div class="fl-dur">${f.duration?esc(f.duration):'&nbsp;'}</div>
+        <div class="fl-line"><span class="fl-plane">${ICON_PLANE}</span></div>
+      </div>
+      <div class="fl-port right">
+        <div class="fl-code">${esc(b.code||b.city.slice(0,3).toUpperCase()||'—')}</div>
+        <div class="fl-city">${esc(b.city)||'&nbsp;'}</div>
+        <div class="fl-time">${f.arrivalTime?esc(f.arrivalTime):'—'}${plus?`<span class="fl-plus">+1</span>`:''}</div>
+      </div>
+    </div>
+    ${pills?`<div class="fl-pills">${pills}</div>`:''}
+    ${f.notes?`<div class="fl-notes">${esc(f.notes)}</div>`:''}
+  </div>`;
+}
 function renderFlightsTab(t){
-  const list = flights.filter(s=>s.tripId===t.id).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const body = list.length ? `<div class="list">${list.map(f=>swipeWrap('flight', f.id, `<div class="entry"><div class="entry-main"><div class="entry-name">${esc(f.from)} → ${esc(f.to)}</div>${(f.date||f.time)?`<div class="entry-sub">${fmtDate(f.date)||'?'}${f.time?' · '+esc(f.time)+' Uhr':''}</div>`:''}${(f.airline||f.flightNo)?`<div class="entry-pills"><span class="cat-pill pill-violet">${esc([f.airline,f.flightNo].filter(Boolean).join(' · '))}</span></div>`:''}</div></div>`)).join('')}</div>`
+  const list = flights.filter(s=>s.tripId===t.id).sort((a,b)=>((a.date||'9999')+(a.time||'')).localeCompare((b.date||'9999')+(b.time||'')));
+  const body = list.length ? `<div class="list">${list.map(f=>swipeWrap('flight', f.id, flightCardHTML(f))).join('')}</div>`
     : `<div class="empty glass"><b>Noch kein Flug</b>Erfasse deine Flüge inkl. Airline, Flugnummer und Buchungsnummer.</div>`;
   return body + `<button class="add-btn" onclick="openModal('flight')">＋ Flug hinzufügen</button>`;
 }
@@ -1501,6 +1594,10 @@ async function renderActivityScreen(){
 
 /* ===== FORMULAR-MODAL ===== */
 const TITLES = { trip:'Reise', stop:'Stopp', hotel:'Hotel', flight:'Flug', activity:'Aktivität', photo:'Fotografie', pack:'Gegenstand', todo:'Aufgabe' };
+/* Überschriften der Formulare – „Neuer Stopp" / „Stopp bearbeiten" statt „Neu – Stopp" */
+const TITLE_NEW = { trip:'Neue Reise', stop:'Neuer Stopp', hotel:'Neues Hotel', flight:'Neuer Flug',
+  activity:'Neue Aktivität', photo:'Neue Foto-Session', pack:'Neuer Gegenstand', todo:'Neue Aufgabe' };
+function modalTitle(type, id){ return id ? `${TITLES[type]} bearbeiten` : (TITLE_NEW[type] || 'Neuer Eintrag'); }
 const SCHEMAS = {
   trip: [
     { key:'name', label:'Reisename', type:'text', required:true, placeholder:'z.B. Namibia' },
@@ -1525,13 +1622,17 @@ const SCHEMAS = {
     { key:'notes', label:'Notizen', type:'textarea' }
   ],
   flight: [
-    { key:'from', label:'Von', type:'text', required:true, placeholder:'z.B. Frankfurt (FRA)' },
-    { key:'to', label:'Nach', type:'text', required:true, placeholder:'z.B. Windhoek (WDH)' },
+    { key:'from', label:'Von', type:'text', required:true, placeholder:'z.B. Frankfurt (FRA)', pair:'start' },
+    { key:'to', label:'Nach', type:'text', required:true, placeholder:'z.B. Windhoek (WDH)', pair:'end' },
     { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
-    { key:'time', label:'Uhrzeit', type:'time', pair:'end' },
-    { key:'airline', label:'Airline', type:'text' },
-    { key:'flightNo', label:'Flugnummer', type:'text' },
-    { key:'bookingRef', label:'Buchungsnummer', type:'text' },
+    { key:'time', label:'Abflug', type:'time', pair:'end' },
+    { key:'arrivalTime', label:'Ankunft', type:'time', pair:'start' },
+    { key:'duration', label:'Flugdauer', type:'text', placeholder:'z.B. 10h 15min', pair:'end' },
+    { key:'airline', label:'Airline', type:'text', placeholder:'z.B. Discover Airlines', pair:'start' },
+    { key:'flightNo', label:'Flugnummer', type:'text', placeholder:'z.B. 4Y 132', pair:'end' },
+    { key:'cabin', label:'Klasse', type:'text', placeholder:'z.B. Economy', pair:'start' },
+    { key:'seat', label:'Sitzplatz', type:'text', placeholder:'z.B. 32A', pair:'end' },
+    { key:'bookingRef', label:'Buchungsnummer', type:'text', placeholder:'z.B. 9DXP4O' },
     { key:'notes', label:'Notizen', type:'textarea' }
   ],
   activity: [
@@ -1595,15 +1696,13 @@ function openModal(type, id){
   modalType=type; modalId=id||null; formImages=[];
   const schema=SCHEMAS[type];
   const entry = id ? arr(type).find(x=>x.id===id) : null;
-  $('form-title').textContent = type==='trip' ? (id?'Reise bearbeiten':'Neue Reise') : ((id?'Bearbeiten – ':'Neu – ') + TITLES[type]);
+  $('form-title').textContent = modalTitle(type, id);
   $('form-fields').innerHTML = buildFields(schema.filter(f=>!(f.editOnly && !id)), entry);
   // Arrays zurück in Text
   if (entry) {
     if (entry.equipment && $('f_equipment')) $('f_equipment').value = entry.equipment.join(', ');
     if (entry.motives && $('f_motives')) $('f_motives').value = entry.motives.join('\n');
   }
-  // Löschen im Reise-Formular ausgeblendet – dort wird über Swipe gelöscht.
-  $('form-danger-row').style.display = (id && type!=='trip') ? 'flex' : 'none';
   if (type==='photo'){
     formImages = [];
     renderImageGrid();
@@ -1667,24 +1766,6 @@ async function persistFormImages(){
   }
   if (idbReady) { for (const ref of originalRefs) { if (!isDataUri(ref) && !kept.includes(ref)) await idbDelete(ref); } }
   return kept;
-}
-async function deleteCurrentEntry(){
-  const type=modalType, id=modalId; if(!id) return;
-  const ok=await showDialog(type==='trip'?'Die Reise inkl. aller Stopps, Hotels, Flüge, Aktivitäten und Listen wird unwiderruflich gelöscht.':'Dieser Eintrag wird unwiderruflich gelöscht.',{title:'Wirklich löschen?',okText:'Löschen'});
-  if(!ok) return;
-  if (type==='trip'){
-    if (idbReady) { for (const a of activities.filter(x=>x.tripId===id)) { for (const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); } }
-    setArr('trip', trips.filter(t=>t.id!==id)); persist('trip');
-    ['stop','hotel','flight','activity','pack','todo'].forEach(tp=>{ setArr(tp, arr(tp).filter(x=>x.tripId!==id)); persist(tp); });
-    closeModal(); closeTripScreen();
-  } else {
-    if ((type==='activity'||type==='photo') && idbReady) { const a=activities.find(x=>x.id===id); if(a) for(const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); }
-    setArr(type, arr(type).filter(x=>x.id!==id)); persist(type);
-    closeModal();
-    if (type==='activity' && currentActivityId===id){ closeActivityScreen(); }
-    else renderTabContent();
-  }
-  showToast('Gelöscht');
 }
 
 /* ===== BACKUP (Payload) – von Cloud-Backup genutzt ===== */
