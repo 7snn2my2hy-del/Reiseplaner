@@ -237,6 +237,54 @@
   .rt-plane svg { width: 15px; height: 15px; color: var(--violet); transform: rotate(90deg); }
   .rt-row.flight .rt-name { font-size: 0.92rem; font-weight: 600; color: var(--violet); }
   .rt-row.flight .rt-body { padding-bottom: 20px; }
+  /* Hotel im Zeitstrahl: Bett-Marker in Amber/Gold */
+  .rt-bed { position: relative; display: flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 50%; background: var(--bg); margin-top: 1px; box-shadow: 0 0 0 3px var(--bg); }
+  .rt-bed svg { width: 14px; height: 14px; color: var(--orange); }
+  .rt-row.hotel .rt-name { color: var(--orange); }
+  .rt-nights.amber { background: rgba(255,159,10,0.15); color: var(--orange); }
+  /* Aktivität im Zeitstrahl: Karten-Pin in Teal */
+  .rt-pin { position: relative; display: flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 50%; background: var(--bg); margin-top: 1px; box-shadow: 0 0 0 3px var(--bg); }
+  .rt-pin svg { width: 15px; height: 15px; color: var(--petrol); }
+  .rt-row.activity .rt-name { color: var(--petrol); }
+  /* Kategorie-Wahl beim Neu-Anlegen */
+  .add-choices { display: flex; flex-direction: column; gap: 10px; }
+  .add-choice { display: flex; align-items: center; gap: 14px; width: 100%; padding: 15px 16px; border-radius: var(--r-control); background: rgba(255,255,255,0.05); border: 1px solid var(--stroke); color: var(--text); font: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: left; transition: transform 0.3s var(--spring), background 0.15s; }
+  .add-choice:active { transform: scale(0.97); background: rgba(255,255,255,0.09); }
+  .add-choice .ac-ic { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; flex: 0 0 34px; }
+  .add-choice .ac-ic svg { width: 19px; height: 19px; }
+  .add-choice .ac-label { flex: 1; }
+  .add-choice .ac-arrow { color: var(--muted-2); font-size: 1.15rem; }
+  .ac-stop .ac-ic { background: rgba(10,132,255,0.16); }
+  .ac-stop .ac-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); }
+  .ac-flight .ac-ic { background: rgba(191,90,242,0.16); color: var(--violet); }
+  .ac-flight .ac-ic svg { transform: rotate(90deg); }
+  .ac-hotel .ac-ic { background: rgba(255,159,10,0.16); color: var(--orange); }
+  .ac-activity .ac-ic { background: rgba(0,179,184,0.16); color: var(--petrol); }
+  /* ===== FOTOGRAFIE: Foto-Ort-Karten ===== */
+  .foto-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
+  .foto-card { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .foto-head { display: flex; align-items: center; gap: 10px; }
+  .foto-ort { flex: 1; min-width: 0; background: transparent; border: none; color: var(--text); font: inherit; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; padding: 2px 0; }
+  .foto-ort:focus { outline: none; }
+  .foto-ort::placeholder { color: var(--muted-2); font-weight: 600; }
+  .foto-del { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 99px; background: rgba(255,255,255,0.06); border: 1px solid var(--stroke); color: var(--muted); font-size: 0.85rem; cursor: pointer; }
+  .foto-del:active { transform: scale(0.92); }
+  .foto-field { display: flex; flex-direction: column; gap: 8px; }
+  .foto-field > label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-2); }
+  .foto-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .foto-input, .foto-textarea { background: rgba(255,255,255,0.05); border: 1px solid var(--stroke); border-radius: var(--r-control); padding: 11px 13px; color: var(--text); font: inherit; font-size: 0.92rem; width: 100%; }
+  .foto-input:focus, .foto-textarea:focus { outline: none; border-color: var(--accent); background: rgba(10,132,255,0.08); }
+  .foto-textarea { resize: vertical; min-height: 46px; line-height: 1.45; }
+  .foto-strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .foto-thumb { position: relative; flex: 0 0 auto; width: 92px; height: 92px; border-radius: 14px; overflow: hidden; border: 1px solid var(--stroke); background: rgba(255,255,255,0.04) center/cover no-repeat; cursor: pointer; }
+  .foto-thumb-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted-2); }
+  .foto-thumb .img-del { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 99px; background: rgba(0,0,0,0.65); color: #fff; border: none; font-size: 0.8rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .foto-add { flex: 0 0 auto; width: 92px; height: 92px; border-radius: 14px; border: 1px dashed var(--stroke-hi); background: rgba(255,255,255,0.03); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .foto-add:active { transform: scale(0.96); }
+  .foto-add .plus { font-size: 1.6rem; line-height: 1; }
+  /* Bild-Viewer (Vollbild) */
+  .img-viewer { z-index: 600; align-items: center; padding: 20px; }
+  .img-viewer img { max-width: 100%; max-height: 90dvh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
   .rt-sub { margin-top: 4px; font-size: 0.72rem; color: var(--muted-2); }
   /* Inhalt */
   .rt-body { min-width: 0; padding: 0 2px 24px 8px; }
@@ -591,6 +639,20 @@
   </div>
 </div>
 
+<!-- Kategorie-Wahl beim Neu-Anlegen -->
+<div class="overlay" id="add-overlay" onclick="if(event.target===this)closeAddPicker()">
+  <div class="modal" style="max-width:420px">
+    <div class="grabber"></div>
+    <h2>Neu anlegen</h2>
+    <div class="add-choices" id="add-choices"></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeAddPicker()">Abbrechen</button></div>
+  </div>
+</div>
+
+<!-- Fotografie: versteckter Datei-Input + Vollbild-Viewer -->
+<input type="file" id="foto-file-input" accept="image/*" multiple style="display:none" onchange="handleFotoFiles(this.files)">
+<div class="overlay img-viewer" id="img-viewer" onclick="closeImgViewer()"><img id="img-viewer-img" src="" alt=""></div>
+
 <div class="toast" id="toast"><span class="toast-label" id="toast-label"></span></div>
 
 <script>
@@ -725,6 +787,13 @@ let packing    = safeParse(store.get(KEYS.packing), []);
 let todos      = safeParse(store.get(KEYS.todos), []);
 let visited    = safeParse(store.get(KEYS.visited), []);
 let autoTrips  = safeParse(store.get(KEYS.autoTrips), []);
+
+/* Migration: früheres Hotel-Feld „Adresse" ins neue Feld „Ort" übernehmen */
+(function migrateHotelCity(){
+  let changed=false;
+  for (const h of hotels){ if (h.address && !h.city){ h.city = h.address; delete h.address; changed=true; } }
+  if (changed) store.set(KEYS.hotels, JSON.stringify(hotels));
+})();
 const DATA = { trip:['trips',KEYS.trips], stop:['stops',KEYS.stops], hotel:['hotels',KEYS.hotels], flight:['flights',KEYS.flights], activity:['activities',KEYS.activities], photo:['activities',KEYS.activities], pack:['packing',KEYS.packing], todo:['todos',KEYS.todos] };
 const REFS = { trips:()=>trips, stops:()=>stops, hotels:()=>hotels, flights:()=>flights, activities:()=>activities, packing:()=>packing, todos:()=>todos };
 function arr(type){ return REFS[DATA[type][0]](); }
@@ -767,6 +836,12 @@ function deToISO(s){
   const dt=new Date(year, mon-1, day);
   if(dt.getFullYear()!==year || dt.getMonth()!==mon-1 || dt.getDate()!==day) return '';
   return `${y}-${String(mon).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+/* Beim Verlassen eines Datumsfelds sauber auf TT.MM.JJJJ bringen (10.9.26 -> 10.09.2026).
+   Ungültige Eingaben bleiben unverändert stehen, damit man sie korrigieren kann. */
+function fixDate(el){
+  const iso = deToISO(el.value);
+  if (iso) el.value = isoToDE(iso);
 }
 /* Setzt beim Tippen automatisch die Punkte (09092026 -> 09.09.2026). Selbst getippte Punkte bleiben erhalten. */
 /* Uhrzeit beim Tippen formatieren: 2155 -> 21:55, 930 -> 9:30 */
@@ -1130,6 +1205,8 @@ function countdownParts(t){
 
 /* Icons wie in der Finanzen-App */
 const ICON_PLANE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z"/></svg>';
+const ICON_BED = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 7a1 1 0 0 0-2 0v11a1 1 0 0 0 2 0v-2h16v2a1 1 0 0 0 2 0v-7a4 4 0 0 0-4-4H4V7Zm0 4h5a2 2 0 0 1 2 2v1H4v-3Zm9 3v-1a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1h-7Z"/></svg>';
+const ICON_PIN = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 4.7 6.2 12.3 6.4 12.6a.8.8 0 0 0 1.2 0C12.8 21.3 19 13.7 19 9a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>';
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 const ICON_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 
@@ -1176,8 +1253,7 @@ function swipeWrap(type, id, inner){
 /* Löscht einen Eintrag nach Rückfrage – inkl. Bildern aus der Datenbank */
 async function deleteEntryById(type, id){
   const e = arr(type).find(x=>x.id===id); if(!e) return;
-  const was = type==='flight' ? `${e.from} → ${e.to}` : e.name;
-  const ok = await showDialog('Der Eintrag wird unwiderruflich gelöscht.', { title:`„${was}" löschen?`, okText:'Löschen' });
+  const ok = await showDialog('Der Eintrag wird unwiderruflich gelöscht.', { title:'Löschen?', okText:'Löschen' });
   if(!ok) return;
   if (idbReady && e.images) for (const ref of e.images) if(!isDataUri(ref)) await idbDelete(ref);
   const list = arr(type); const i = list.findIndex(x=>x.id===id);
@@ -1312,7 +1388,7 @@ function attachSwipeGeneric(wrap, onDelete, onEdit) {
 /* Reise inkl. aller zugehörigen Daten und Bilder löschen (über Swipe) */
 async function deleteTripById(id){
   const t = trips.find(x=>x.id===id); if(!t) return;
-  const ok = await showDialog('Die Reise inkl. aller Stopps, Flüge, Hotels, Aktivitäten und Listen wird unwiderruflich gelöscht.', { title:`„${t.name}" löschen?`, okText:'Löschen' });
+  const ok = await showDialog('Die Reise inkl. aller Stopps, Flüge, Hotels, Aktivitäten und Listen wird unwiderruflich gelöscht.', { title:'Löschen?', okText:'Löschen' });
   if(!ok) return;
   if (idbReady) { for (const a of activities.filter(x=>x.tripId===id)) for (const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); }
   setArr('trip', trips.filter(x=>x.id!==id)); persist('trip');
@@ -1324,7 +1400,7 @@ async function deleteTripById(id){
 
 /* ===== REISE-DETAIL ===== */
 let currentTripId = null, activeTab = 'overview';
-const TABS = [['overview','Übersicht'],['route','Route'],['flights','Flüge'],['hotels','Hotels'],['activities','Aktivitäten'],['photos','Fotografie'],['packing','Packliste']];
+const TABS = [['overview','Übersicht'],['route','Route'],['photos','Fotografie']];
 
 function openTripScreen(id){ currentTripId=id; activeTab='overview'; renderTripScreen(); $('trip-screen').classList.add('open'); }
 function closeTripScreen(){ $('trip-screen').classList.remove('open'); currentTripId=null; renderHome(); }
@@ -1344,7 +1420,7 @@ function renderTripScreen(){
 function renderTabContent(){
   const t = currentTrip(); if(!t) return;
   const el = $('tab-content');
-  const map = { overview:renderOverviewTab, route:renderRouteTab, hotels:renderHotelsTab, flights:renderFlightsTab, activities:renderActivitiesTab, photos:renderPhotosTab, packing:renderPackingTab };
+  const map = { overview:renderOverviewTab, route:renderRouteTab, photos:renderPhotosTab };
   el.innerHTML = map[activeTab](t);
   wireEntrySwipe();
 }
@@ -1384,7 +1460,49 @@ function renderOverviewTab(t){
       <div class="stat"><div class="stat-label">Fotografie</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type==='foto').length}</div></div>
     </div>
   </div>`;
-  return hero + renderTodosSection(t);
+  return hero + renderTodosSection(t) + renderPackSection(t);
+}
+/* Packliste – gleiche Mechanik wie die Checkliste, direkt in der Übersicht */
+function renderPackSection(t){
+  const list = packing.filter(s=>s.tripId===t.id);
+  const open = list.filter(i=>!i.checked);
+  const done = list.filter(i=>i.checked);
+  const ordered = [...open, ...done];
+  const rows = ordered.map(i => `
+    <div class="todo-row${i.checked?' checked':''}">
+      <button class="todo-check${i.checked?' checked':''}" onclick="togglePack('${i.id}')" aria-label="Eingepackt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </button>
+      <input class="todo-text" value="${esc(i.name)}" onchange="renamePack('${i.id}', this.value)"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      <button class="todo-del" onclick="removePack('${i.id}')" aria-label="Löschen">✕</button>
+    </div>`).join('');
+  const newRow = `
+    <div class="todo-row todo-new">
+      <span class="todo-check ghost"></span>
+      <input class="todo-text" id="pack-new" placeholder="Neuer Gegenstand …"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();addPackInline();}"
+             onblur="addPackInline(true)">
+    </div>`;
+  const count = list.length ? ` <span class="sl-count">${done.length}/${list.length}</span>` : '';
+  return `<div class="section-label" style="margin-top:26px">Packliste${count}</div><div class="todo-list">${rows}${newRow}</div>`;
+}
+function togglePack(id){ const i=packing.find(x=>x.id===id); if(!i) return; i.checked=!i.checked; persist('pack'); renderTabContent(); }
+function renamePack(id, val){
+  const i=packing.find(x=>x.id===id); if(!i) return;
+  const name=val.trim();
+  if (!name) { setArr('pack', packing.filter(x=>x.id!==id)); persist('pack'); renderTabContent(); return; }
+  i.name=name; persist('pack');
+}
+function removePack(id){ setArr('pack', packing.filter(x=>x.id!==id)); persist('pack'); renderTabContent(); }
+function addPackInline(silent){
+  const inp=$('pack-new'); if(!inp) return;
+  const name=inp.value.trim();
+  if (!name) return;
+  packing.push({ id:uid(), tripId:currentTripId, name, checked:false });
+  persist('pack');
+  renderTabContent();
+  if (!silent) { const next=$('pack-new'); if(next) next.focus(); }
 }
 function stopLabel(id){ const s=stops.find(x=>x.id===id); return s?s.name:''; }
 
@@ -1396,14 +1514,19 @@ function nightsBetween(a, b){
   return Math.max(0, Math.round((d2-d1)/86400000));
 }
 function renderRouteTab(t){
-  // Stopps und Flüge in einer Zeitleiste – chronologisch gemischt
-  const st = stops.filter(s=>s.tripId===t.id).map(s=>({ art:'stop', datum:s.arrival||'', zeit:'', o:s }));
-  const fl = flights.filter(f=>f.tripId===t.id).map(f=>({ art:'flight', datum:f.date||'', zeit:f.time||'', o:f }));
-  const list = [...st, ...fl].sort((a,b)=>
-    ((a.datum||'9999')+(a.zeit||'  ')).localeCompare((b.datum||'9999')+(b.zeit||'  ')));
+  // Stopps, Flüge, Hotels und Aktivitäten laufen chronologisch in einer Zeitleiste zusammen
+  const prio = { flight:0, hotel:1, activity:2, stop:3 };
+  const items = [];
+  stops.filter(s=>s.tripId===t.id).forEach(s=> items.push({ art:'stop', datum:s.arrival||'', zeit:'', o:s }));
+  flights.filter(f=>f.tripId===t.id).forEach(f=> items.push({ art:'flight', datum:f.date||'', zeit:f.time||'', o:f }));
+  hotels.filter(h=>h.tripId===t.id).forEach(h=> items.push({ art:'hotel', datum:h.checkin||'', zeit:'', o:h }));
+  activities.filter(a=>a.tripId===t.id && a.type!=='foto').forEach(a=> items.push({ art:'activity', datum:a.date||'', zeit:a.time||'', o:a }));
+  const list = items.sort((a,b)=>
+    ((a.datum||'9999-99-99')+(a.zeit||'~~')+prio[a.art])
+      .localeCompare((b.datum||'9999-99-99')+(b.zeit||'~~')+prio[b.art]));
 
-  if(!list.length) return `<div class="empty glass"><b>Noch keine Stopps</b>Leg die Route deiner Reise fest – jeder Stopp kann eigene Hotels und Aktivitäten haben.</div>`
-    + `<button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
+  if(!list.length) return `<div class="empty glass"><b>Noch keine Route</b>Leg Stopps, Flüge, Hotels und Aktivitäten an – alles läuft hier chronologisch zusammen.</div>`
+    + `<button class="add-btn" onclick="openAddPicker()">＋ Hinzufügen</button>`;
 
   const datumsSpalte = (iso) => {
     const d = iso ? new Date(iso+'T00:00:00') : null;
@@ -1414,39 +1537,66 @@ function renderRouteTab(t){
 
   const body = list.map((item, i) => {
     const last = i===list.length-1;
+    const o = item.o;
     if (item.art === 'flight') {
-      const f = item.o, a = splitAirport(f.from), b = splitAirport(f.to);
-      const plus = arrivalDayOffset(f);
-      const dauer = f.duration || '';
-      return swipeWrap('flight', f.id, `<div class="rt-row flight${last?' last':''}" onclick="openModal('flight','${f.id}')">
-        <div class="rt-date">${datumsSpalte(f.date)}</div>
+      const a = splitAirport(o.from), b = splitAirport(o.to);
+      const plus = arrivalDayOffset(o);
+      const dauer = o.duration || '';
+      return swipeWrap('flight', o.id, `<div class="rt-row flight${last?' last':''}" onclick="openModal('flight','${o.id}')">
+        <div class="rt-date">${datumsSpalte(o.date)}</div>
         <div class="rt-line"><span class="rt-plane">${ICON_PLANE}</span></div>
         <div class="rt-body">
           <div class="rt-name">${esc(a.code||a.city)} → ${esc(b.code||b.city)}</div>
           <div class="rt-meta">
-            ${f.time?`<span>${esc(f.time)}${f.arrivalTime?' – '+esc(f.arrivalTime)+(plus>0?' +'+plus:''):''} Uhr</span>`:''}
+            ${o.time?`<span>${esc(o.time)}${o.arrivalTime?' – '+esc(o.arrivalTime)+(plus>0?' +'+plus:''):''} Uhr</span>`:''}
             ${dauer?`<span class="rt-nights">${esc(dauer)}</span>`:''}
           </div>
-          ${(f.airline||f.flightNo)?`<div class="rt-sub">${esc([f.airline,f.flightNo].filter(Boolean).join(' · '))}</div>`:''}
+          ${(o.airline||o.flightNo)?`<div class="rt-sub">${esc([o.airline,o.flightNo].filter(Boolean).join(' · '))}</div>`:''}
         </div>
       </div>`);
     }
-    const s = item.o;
-    const n = nightsBetween(s.arrival, s.departure);
-    return swipeWrap('stop', s.id, `<div class="rt-row${last?' last':''}" onclick="openModal('stop','${s.id}')">
-      <div class="rt-date">${datumsSpalte(s.arrival)}</div>
+    if (item.art === 'hotel') {
+      const n = nightsBetween(o.checkin, o.checkout);
+      const ort = o.city || o.address || '';
+      return swipeWrap('hotel', o.id, `<div class="rt-row hotel${last?' last':''}" onclick="openModal('hotel','${o.id}')">
+        <div class="rt-date">${datumsSpalte(o.checkin)}</div>
+        <div class="rt-line"><span class="rt-bed">${ICON_BED}</span></div>
+        <div class="rt-body">
+          <div class="rt-name">${esc(o.name)}</div>
+          <div class="rt-meta">
+            ${(o.checkin||o.checkout)?`<span>${fmtDate(o.checkin)||'?'} – ${fmtDate(o.checkout)||'?'}</span>`:''}
+            ${n?`<span class="rt-nights amber">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
+          </div>
+          ${(ort||o.board)?`<div class="rt-sub">${esc([ort,o.board].filter(Boolean).join(' · '))}</div>`:''}
+        </div>
+      </div>`);
+    }
+    if (item.art === 'activity') {
+      return swipeWrap('activity', o.id, `<div class="rt-row activity${last?' last':''}" onclick="openModal('activity','${o.id}')">
+        <div class="rt-date">${datumsSpalte(o.date)}</div>
+        <div class="rt-line"><span class="rt-pin">${ICON_PIN}</span></div>
+        <div class="rt-body">
+          <div class="rt-name">${esc(o.name)}</div>
+          ${(o.date||o.time)?`<div class="rt-meta"><span>${fmtDate(o.date)||'?'}${o.time?' · '+esc(o.time)+' Uhr':''}</span></div>`:''}
+          ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
+        </div>
+      </div>`);
+    }
+    const n = nightsBetween(o.arrival, o.departure);
+    return swipeWrap('stop', o.id, `<div class="rt-row${last?' last':''}" onclick="openModal('stop','${o.id}')">
+      <div class="rt-date">${datumsSpalte(o.arrival)}</div>
       <div class="rt-line"><span class="rt-dot"></span></div>
       <div class="rt-body">
-        <div class="rt-name">${esc(s.name)}</div>
+        <div class="rt-name">${esc(o.name)}</div>
         <div class="rt-meta">
-          ${(s.arrival||s.departure)?`<span>${fmtDate(s.arrival)||'?'} – ${fmtDate(s.departure)||'?'}</span>`:''}
+          ${(o.arrival||o.departure)?`<span>${fmtDate(o.arrival)||'?'} – ${fmtDate(o.departure)||'?'}</span>`:''}
           ${n?`<span class="rt-nights">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
         </div>
-        ${s.notes?`<div class="rt-notes">${esc(s.notes)}</div>`:''}
+        ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
       </div>
     </div>`);
   }).join('');
-  return `<div class="rt-list">${body}</div><button class="add-btn" onclick="openModal('stop')">＋ Stopp hinzufügen</button>`;
+  return `<div class="rt-list">${body}</div><button class="add-btn" onclick="openAddPicker()">＋ Hinzufügen</button>`;
 }
 function renderHotelsTab(t){
   const list = hotels.filter(s=>s.tripId===t.id).sort((a,b)=>(a.checkin||'9999').localeCompare(b.checkin||'9999'));
@@ -1514,13 +1664,114 @@ function renderActivitiesTab(t){
     : `<div class="empty glass"><b>Noch keine Aktivität</b>Plane Ausflüge, Touren und alles, was du unterwegs machen möchtest.</div>`;
   return body + `<button class="add-btn" onclick="openModal('activity')">＋ Aktivität hinzufügen</button>`;
 }
-/* Fotografie: eigener Bereich mit Equipment, Motiven und Referenzbildern */
+/* Fotografie: immer offene Foto-Ort-Karten direkt im Tab.
+   Ein Foto-Ort ist ein activities-Eintrag mit type:'foto' (name = Ort). */
 function renderPhotosTab(t){
-  const list = activities.filter(s=>s.tripId===t.id && s.type==='foto').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);const n=(a.images&&a.images.length)||0;return swipeWrap('photo', a.id, `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}<div class="entry-pills">${sn?`<span class="cat-pill pill-blue">${esc(sn)}</span>`:''}${n?`<span class="cat-pill pill-orange">${n} Foto${n===1?'':'s'}</span>`:''}${a.equipment&&a.equipment.length?`<span class="cat-pill pill-violet">${a.equipment.length} Equipment</span>`:''}</div></div><div class="entry-right">›</div></div>`);}).join('')}</div>`
-    : `<div class="empty glass"><b>Noch keine Foto-Session</b>Plane deine Shootings mit Equipment, Motiven und Referenzbildern.</div>`;
-  return body + `<button class="add-btn" onclick="openModal('photo')">＋ Foto-Session hinzufügen</button>`;
+  const list = activities.filter(s=>s.tripId===t.id && s.type==='foto')
+                 .sort((a,b)=>((a.order||0)-(b.order||0)) || String(a.id).localeCompare(String(b.id)));
+  const body = list.length
+    ? `<div class="foto-list">${list.map(fotoCardHTML).join('')}</div>`
+    : `<div class="empty glass"><b>Noch kein Foto-Ort</b>Leg Orte für deine Shootings an – mit Equipment, Notizen und Referenzbildern.</div>`;
+  setTimeout(loadFotoImages, 0);
+  return body + `<button class="add-btn" onclick="addFotoPlace()">＋ Foto-Ort hinzufügen</button>`;
 }
+function fotoCardHTML(p){
+  const pills = (p.equipment&&p.equipment.length)
+    ? `<div class="foto-pills">${p.equipment.map(e=>`<span class="cat-pill pill-violet">${esc(e)}</span>`).join('')}</div>` : '';
+  const imgs = (p.images||[]).map((ref,idx)=>
+    `<div class="foto-thumb" data-ref="${esc(ref)}" onclick="viewFotoImage('${p.id}',${idx})">
+       <div class="foto-thumb-ph">…</div>
+       <button class="img-del" onclick="event.stopPropagation();deleteFotoImage('${p.id}','${esc(ref)}')" aria-label="Bild löschen">✕</button>
+     </div>`).join('');
+  return `<div class="glass foto-card" data-id="${p.id}">
+    <div class="foto-head">
+      <input class="foto-ort" value="${esc(p.name||'')}" placeholder="Ort, z.B. Sossusvlei – Dünen"
+             onchange="renameFotoPlace('${p.id}', this.value)"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      <button class="foto-del" onclick="deleteFotoPlace('${p.id}')" aria-label="Foto-Ort löschen">✕</button>
+    </div>
+    <div class="foto-field">
+      <label>Equipment</label>
+      ${pills}
+      <input class="foto-input" value="${esc((p.equipment||[]).join(', '))}" placeholder="z.B. 14mm GM, Stativ, L-Bracket"
+             onchange="setFotoEquipment('${p.id}', this.value)">
+    </div>
+    <div class="foto-field">
+      <label>Notizen</label>
+      <textarea class="foto-textarea" placeholder="Notizen zum Shooting …" rows="2"
+             onchange="setFotoNotes('${p.id}', this.value)">${esc(p.notes||'')}</textarea>
+    </div>
+    <div class="foto-field">
+      <label>Referenzbilder</label>
+      <div class="foto-strip">
+        ${imgs}
+        <div class="foto-add" onclick="pickFotoImages('${p.id}')" aria-label="Foto hinzufügen"><span class="plus">＋</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+async function loadFotoImages(){
+  const thumbs = document.querySelectorAll('.foto-thumb[data-ref]');
+  for (const th of thumbs){
+    if (th.classList.contains('loaded')) continue;
+    const ref = th.getAttribute('data-ref');
+    let src = isDataUri(ref) ? ref : (idbReady ? await idbGet(ref) : null);
+    if (src){ th.style.backgroundImage = `url(${src})`; th.classList.add('loaded'); const ph=th.querySelector('.foto-thumb-ph'); if(ph) ph.remove(); }
+  }
+}
+function addFotoPlace(){
+  const p={ id:uid(), tripId:currentTripId, type:'foto', name:'', equipment:[], notes:'', images:[], order:Date.now() };
+  activities.push(p);
+  persist('activity');
+  renderTabContent();
+  setTimeout(()=>{ const el=document.querySelector(`.foto-card[data-id="${p.id}"] .foto-ort`); if(el) el.focus(); }, 60);
+}
+function renameFotoPlace(id,val){ const p=activities.find(x=>x.id===id); if(!p) return; p.name=(val||'').trim(); persist('activity'); }
+function setFotoEquipment(id,val){ const p=activities.find(x=>x.id===id); if(!p) return; p.equipment = val?val.split(',').map(s=>s.trim()).filter(Boolean):[]; persist('activity'); renderTabContent(); }
+function setFotoNotes(id,val){ const p=activities.find(x=>x.id===id); if(!p) return; p.notes=val; persist('activity'); }
+async function deleteFotoPlace(id){
+  const p=activities.find(x=>x.id===id); if(!p) return;
+  const ok=await showDialog('Der Foto-Ort wird unwiderruflich gelöscht.',{title:'Löschen?',okText:'Löschen'});
+  if(!ok) return;
+  if(idbReady && p.images) for(const ref of p.images) if(!isDataUri(ref)) await idbDelete(ref);
+  setArr('activity', activities.filter(x=>x.id!==id));
+  persist('activity');
+  renderTabContent();
+  showToast('Gelöscht');
+}
+let _fotoPickId = null;
+function pickFotoImages(id){ _fotoPickId=id; const inp=$('foto-file-input'); if(inp){ inp.value=''; inp.click(); } }
+async function handleFotoFiles(files){
+  const id=_fotoPickId; const p=activities.find(x=>x.id===id); if(!p) return;
+  if(!p.images) p.images=[];
+  for(const f of files){
+    try{
+      const data=await resizeImage(f);
+      if(idbReady){ const nid='img_'+uid(); await idbPut(nid,data); p.images.push(nid); }
+      else p.images.push(data);
+    }catch(e){}
+  }
+  persist('activity');
+  renderTabContent();
+  loadFotoImages();
+}
+async function deleteFotoImage(id, ref){
+  const p=activities.find(x=>x.id===id); if(!p||!p.images) return;
+  p.images=p.images.filter(r=>r!==ref);
+  if(idbReady && !isDataUri(ref)) await idbDelete(ref);
+  persist('activity');
+  renderTabContent();
+  loadFotoImages();
+}
+async function viewFotoImage(id, idx){
+  const p=activities.find(x=>x.id===id); if(!p||!p.images||!p.images[idx]) return;
+  const ref=p.images[idx];
+  let src = isDataUri(ref) ? ref : (idbReady ? await idbGet(ref) : null);
+  if(!src) return;
+  $('img-viewer-img').src=src;
+  $('img-viewer').classList.add('open');
+}
+function closeImgViewer(){ $('img-viewer').classList.remove('open'); $('img-viewer-img').src=''; }
 
 const PACK_TEMPLATE = [['Reisepass','Dokumente'],['Impfpass','Dokumente'],['Auslandskrankenversicherung','Dokumente'],['Flugtickets / Buchungen','Dokumente'],['Ladekabel & Netzteil','Technik'],['Powerbank','Technik'],['Reiseadapter','Technik'],['Kamera-Body','Fotografie'],['Objektive','Fotografie'],['Speicherkarten','Fotografie'],['Ersatzakkus','Fotografie'],['Stativ','Fotografie'],['Sonnencreme','Hygiene & Gesundheit'],['Mückenschutz','Hygiene & Gesundheit'],['Reiseapotheke','Hygiene & Gesundheit']];
 function renderPackingTab(t){
@@ -1641,13 +1892,10 @@ const SCHEMAS = {
   ],
   hotel: [
     { key:'name', label:'Hotel', type:'text', required:true, placeholder:'z.B. Kulala Desert Lodge' },
-    { key:'stopId', label:'Stopp', type:'select-stop' },
     { key:'checkin', label:'Check-in', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
     { key:'checkout', label:'Check-out', type:'text', date:true, placeholder:'z.B. 12.09.2026', pair:'end' },
-    { key:'address', label:'Adresse', type:'text' },
-    { key:'bookingRef', label:'Buchungsnummer', type:'text' },
-    { key:'price', label:'Preis', type:'text', placeholder:'z.B. 240 € / Nacht' },
-    { key:'notes', label:'Notizen', type:'textarea' }
+    { key:'city', label:'Ort', type:'text', placeholder:'z.B. Windhoek, Namibia' },
+    { key:'board', label:'Verpflegung', type:'text', placeholder:'z.B. Frühstück' }
   ],
   flight: [
     { key:'from', label:'Von', type:'text', required:true, placeholder:'z.B. Frankfurt (FRA)', pair:'start' },
@@ -1661,8 +1909,7 @@ const SCHEMAS = {
     { key:'flightNo', label:'Flugnummer', type:'text', placeholder:'z.B. 4Y 132', pair:'start' },
     { key:'cabin', label:'Klasse', type:'text', placeholder:'z.B. Economy', pair:'end' },
     { key:'seat', label:'Sitzplatz', type:'text', placeholder:'z.B. 32A', pair:'start' },
-    { key:'bookingRef', label:'Buchungsnummer', type:'text', placeholder:'z.B. 9DXP4O', pair:'end' },
-    { key:'notes', label:'Notizen', type:'textarea' }
+    { key:'bookingRef', label:'Buchungsnummer', type:'text', placeholder:'z.B. 9DXP4O', pair:'end' }
   ],
   activity: [
     { key:'name', label:'Aktivität', type:'text', required:true, placeholder:'z.B. Sundowner Düne 45' },
@@ -1688,7 +1935,7 @@ const SCHEMAS = {
 let modalType=null, modalId=null, formImages=[];
 function fieldHTML(f, value){
   const v = value ?? '';
-  if (f.date) return `<div class="field"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" autocomplete="off" oninput="autoDate(this)"></div>`;
+  if (f.date) return `<div class="field"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" inputmode="numeric" autocomplete="off" oninput="autoDate(this)" onblur="fixDate(this)"></div>`;
   if (f.type==='textarea') return `<div class="field"><label>${f.label}</label><textarea id="f_${f.key}" placeholder="${esc(f.placeholder||'')}">${esc(v)}</textarea></div>`;
   if (f.type==='select-stop'){ const l=stops.filter(s=>s.tripId===currentTripId); return `<div class="field"><label>${f.label}</label><select id="f_${f.key}"><option value="">Kein Stopp</option>${l.map(s=>`<option value="${s.id}" ${v===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>`; }
   if (f.type==='images') return `<div class="field"><label>${f.label}</label><div class="img-grid" id="f_images_grid"></div><input type="file" id="f_images_input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files)"></div>`;
@@ -1710,7 +1957,7 @@ function buildFields(list, entry){
 /* Label+Input ohne äußeren .field-Wrapper (für die zweispaltige Zeile) */
 function innerField(f, value){
   const v = value ?? '';
-  if (f.date) return `<label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" autocomplete="off" oninput="autoDate(this)">`;
+  if (f.date) return `<label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(isoToDE(v))}" placeholder="${esc(f.placeholder||'z.B. 31.12.2026')}" inputmode="numeric" autocomplete="off" oninput="autoDate(this)" onblur="fixDate(this)">`;
   // Uhrzeit als normales Textfeld statt iOS-Rad – tippen ist schneller als scrollen
   if (f.type==='time') return `<label>${f.label}</label><input type="text" id="f_${f.key}" value="${esc(v)}" placeholder="${esc(f.placeholder||'z.B. 21:55')}" inputmode="numeric" autocomplete="off" oninput="autoTime(this)" onblur="fixTime(this)">`;
   return `<label>${f.label}</label><input type="${f.type}" id="f_${f.key}" value="${esc(v)}" placeholder="${esc(f.placeholder||'')}">`;
@@ -1722,6 +1969,22 @@ function renderImageGrid(){ const g=$('f_images_grid'); if(!g) return; g.innerHT
 function removeFormImage(i){ formImages.splice(i,1); renderImageGrid(); }
 function resizeImage(file, maxW=900, q=0.72){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>{ const img=new Image(); img.onload=()=>{ let w=img.width,h=img.height; if(w>maxW){h=Math.round(h*maxW/w);w=maxW;} const cv=document.createElement('canvas'); cv.width=w;cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); res(cv.toDataURL('image/jpeg',q)); }; img.onerror=rej; img.src=e.target.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
 async function handleImageFiles(files){ for(const f of files){ try{ formImages.push({ data: await resizeImage(f), isNew:true }); }catch(e){} } renderImageGrid(); const inp=$('f_images_input'); if(inp) inp.value=''; }
+
+/* Beim „＋" zuerst die Kategorie wählen, dann das passende Formular öffnen */
+function openAddPicker(){
+  const opts = [
+    ['stop','Stopp','<span class="ac-dot"></span>','ac-stop'],
+    ['flight','Flug',ICON_PLANE,'ac-flight'],
+    ['hotel','Hotel',ICON_BED,'ac-hotel'],
+    ['activity','Aktivität',ICON_PIN,'ac-activity']
+  ];
+  $('add-choices').innerHTML = opts.map(([type,label,icon,cls])=>
+    `<button class="add-choice ${cls}" onclick="pickAdd('${type}')"><span class="ac-ic">${icon}</span><span class="ac-label">${label}</span><span class="ac-arrow">›</span></button>`
+  ).join('');
+  $('add-overlay').classList.add('open');
+}
+function closeAddPicker(){ $('add-overlay').classList.remove('open'); }
+function pickAdd(type){ closeAddPicker(); openModal(type); }
 
 function openModal(type, id){
   modalType=type; modalId=id||null; formImages=[];
