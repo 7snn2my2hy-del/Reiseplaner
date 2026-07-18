@@ -167,7 +167,7 @@
   /* Reise-Kacheln (kompakt, 2-spaltig wie Finanzen-Bento) */
   #trip-tiles .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   /* Swipe-Architektur wie Finanzen: tile-wrap clippt, tile-slider verschiebt sich */
-  .tile-wrap { position: relative; border-radius: 26px; overflow: hidden; }
+  .tile-wrap { position: relative; border-radius: 26px; overflow: hidden; touch-action: pan-y; }
   .tile-slider { display: flex; flex-direction: row; width: 100%; transition: transform 0.42s var(--spring); will-change: transform; }
   .tile-slider.no-transition { transition: none; }
   .tile-slider .trip-tile { flex: 0 0 100%; width: 100%; }
@@ -260,6 +260,19 @@
   .ac-flight .ac-ic svg { transform: rotate(90deg); }
   .ac-hotel .ac-ic { background: rgba(255,159,10,0.16); color: var(--orange); }
   .ac-activity .ac-ic { background: rgba(0,179,184,0.16); color: var(--petrol); }
+  .ac-car .ac-ic { background: rgba(48,209,88,0.16); color: var(--green); }
+  /* Mietwagen im Zeitstrahl: Auto-Marker in Grün */
+  .rt-car { position: relative; display: flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 50%; background: var(--bg); margin-top: 1px; box-shadow: 0 0 0 3px var(--bg); }
+  .rt-car svg { width: 15px; height: 15px; color: var(--green); }
+  .rt-row.car .rt-name { color: var(--green); }
+  /* Unter-Einträge (Hotels/Aktivitäten) eingerückt unter ihrem Stopp */
+  .rt-row.rt-child .rt-body { padding-left: 12px; }
+  .rt-row.rt-child .rt-name { font-size: 0.92rem; }
+  .rt-cmark { position: relative; display: flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); margin-top: 3px; box-shadow: 0 0 0 3px var(--bg); }
+  .rt-cmark svg { width: 12px; height: 12px; }
+  .rt-cmark.bed svg { color: var(--orange); }
+  .rt-cmark.pin svg { color: var(--petrol); }
+  .rt-cdate .rt-day { font-size: 0.9rem; font-weight: 700; color: var(--muted); }
   /* ===== FOTOGRAFIE: Foto-Ort-Karten ===== */
   .foto-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
   .foto-card { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 16px; }
@@ -285,6 +298,33 @@
   /* Bild-Viewer (Vollbild) */
   .img-viewer { z-index: 600; align-items: center; padding: 20px; }
   .img-viewer img { max-width: 100%; max-height: 90dvh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+  /* Ausrüstung: Verwaltung in Einstellungen */
+  .gear-manage { display: flex; flex-direction: column; }
+  .gear-row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; }
+  .gear-row + .gear-row { border-top: 1px solid var(--stroke); }
+  .gear-row input { flex: 1; min-width: 0; background: transparent; border: none; color: var(--text); font: inherit; font-size: 0.92rem; padding: 2px 0; }
+  .gear-row input:focus { outline: none; }
+  .gear-row .gear-del { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 99px; background: rgba(255,255,255,0.06); border: 1px solid var(--stroke); color: var(--muted); font-size: 0.78rem; cursor: pointer; }
+  .gear-row.gear-new .gear-plus { flex: 0 0 auto; width: 22px; color: var(--muted-2); text-align: center; }
+  .gear-row.gear-new input::placeholder { color: var(--muted-2); }
+  /* Equipment-Button auf der Foto-Karte */
+  .foto-equip { display: flex; align-items: center; gap: 8px; width: 100%; padding: 11px 13px; border-radius: var(--r-control); background: rgba(255,255,255,0.05); border: 1px solid var(--stroke); color: var(--text); font: inherit; cursor: pointer; text-align: left; }
+  .foto-equip:active { background: rgba(255,255,255,0.09); }
+  .foto-equip .foto-pills { flex: 1; }
+  .foto-equip-empty { flex: 1; color: var(--muted-2); font-size: 0.92rem; }
+  .foto-equip-chevron { color: var(--muted-2); font-size: 1.1rem; }
+  /* Equipment-Auswahl-Sheet */
+  .gear-choices { display: flex; flex-direction: column; gap: 8px; max-height: 52dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .gear-choice { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: var(--r-control); background: rgba(255,255,255,0.05); border: 1px solid var(--stroke); color: var(--text); font: inherit; font-size: 0.95rem; cursor: pointer; text-align: left; }
+  .gear-choice:active { background: rgba(255,255,255,0.09); }
+  .gear-choice .gc-check { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--stroke-hi); display: flex; align-items: center; justify-content: center; }
+  .gear-choice.on .gc-check { background: var(--violet); border-color: var(--violet); }
+  .gear-choice .gc-check svg { width: 14px; height: 14px; color: #fff; display: none; }
+  .gear-choice.on .gc-check svg { display: block; }
+  .gear-choice .gc-label { flex: 1; }
+  .gear-add-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .gear-add-row .foto-input { flex: 1; }
+  .gear-add-btn { flex: 0 0 auto; width: 48px; padding: 11px 0; font-size: 1.2rem; }
   .rt-sub { margin-top: 4px; font-size: 0.72rem; color: var(--muted-2); }
   /* Inhalt */
   .rt-body { min-width: 0; padding: 0 2px 24px 8px; }
@@ -328,6 +368,9 @@
   /* Vollbild-Screens */
   .screen { position: fixed; inset: 0; z-index: 400; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; transform: translateX(100%); transition: transform 0.4s var(--ease-ios), visibility 0s linear 0.4s; padding: calc(12px + env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom)); visibility: hidden; background: var(--bg); background-image: radial-gradient(1100px 700px at 12% -10%, rgba(10,132,255,0.14), transparent 60%), radial-gradient(900px 600px at 105% 8%, rgba(191,90,242,0.10), transparent 55%), linear-gradient(180deg, var(--bg-2), var(--bg) 60%); }
   .screen.open { transform: translateX(0); visibility: visible; transition: transform 0.4s var(--ease-ios), visibility 0s; }
+  /* Nach der Öffnen-Animation die Transform entfernen – ein dauerhaftes transform auf einem
+     position:fixed-Scrollcontainer bringt iOS-Safari beim Momentum-Scrollen zum Haken. */
+  .screen.settled { transform: none; }
   .screen-topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
   .screen-back { width: 40px; height: 40px; border-radius: 99px; border: 1px solid var(--stroke); background: var(--glass); color: var(--text); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.3s var(--spring); }
   .screen-back:active { transform: scale(0.9); }
@@ -601,6 +644,11 @@
       <span class="sr-chevron">›</span>
     </button>
   </div>
+
+  <div class="section-label">Ausrüstung</div>
+  <div class="settings-group">
+    <div class="gear-manage" id="gear-list"></div>
+  </div>
 </div>
 
 <!-- Lock-Screen -->
@@ -652,6 +700,21 @@
 <!-- Fotografie: versteckter Datei-Input + Vollbild-Viewer -->
 <input type="file" id="foto-file-input" accept="image/*" multiple style="display:none" onchange="handleFotoFiles(this.files)">
 <div class="overlay img-viewer" id="img-viewer" onclick="closeImgViewer()"><img id="img-viewer-img" src="" alt=""></div>
+
+<!-- Equipment-Auswahl (pro Foto-Ort aus der globalen Liste) -->
+<div class="overlay" id="gear-overlay" onclick="if(event.target===this)closeGearPicker()">
+  <div class="modal" style="max-width:480px">
+    <div class="grabber"></div>
+    <h2>Equipment wählen</h2>
+    <div class="gear-choices" id="gear-choices"></div>
+    <div class="gear-add-row">
+      <input type="text" id="gear-add-input" class="foto-input" placeholder="Neues Equipment …"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();gearAddFromPicker();}">
+      <button class="btn btn-secondary gear-add-btn" onclick="gearAddFromPicker()">＋</button>
+    </div>
+    <div class="modal-actions"><button class="btn btn-primary" onclick="closeGearPicker()">Fertig</button></div>
+  </div>
+</div>
 
 <div class="toast" id="toast"><span class="toast-label" id="toast-label"></span></div>
 
@@ -777,16 +840,31 @@ function tripMapSVG(country){
 }
 
 /* ===== DATENMODELL ===== */
-const KEYS = { trips:'rp_trips_v1', stops:'rp_stops_v1', hotels:'rp_hotels_v1', flights:'rp_flights_v1', activities:'rp_activities_v1', packing:'rp_packing_v1', todos:'rp_todos_v1', visited:'rp_visited_v1', autoTrips:'rp_autotrips_v1' };
+const KEYS = { trips:'rp_trips_v1', stops:'rp_stops_v1', hotels:'rp_hotels_v1', flights:'rp_flights_v1', cars:'rp_cars_v1', activities:'rp_activities_v1', packing:'rp_packing_v1', todos:'rp_todos_v1', visited:'rp_visited_v1', autoTrips:'rp_autotrips_v1', gear:'rp_gear_v1' };
 let trips      = safeParse(store.get(KEYS.trips), []);
 let stops      = safeParse(store.get(KEYS.stops), []);
 let hotels     = safeParse(store.get(KEYS.hotels), []);
 let flights    = safeParse(store.get(KEYS.flights), []);
+let cars       = safeParse(store.get(KEYS.cars), []);
 let activities = safeParse(store.get(KEYS.activities), []);
 let packing    = safeParse(store.get(KEYS.packing), []);
 let todos      = safeParse(store.get(KEYS.todos), []);
 let visited    = safeParse(store.get(KEYS.visited), []);
 let autoTrips  = safeParse(store.get(KEYS.autoTrips), []);
+
+/* Globale Ausrüstungsliste – geräteweit, in den Einstellungen pflegbar.
+   Beim ersten Start mit Jörgs bekannter Ausrüstung vorbefüllt. */
+let gear = safeParse(store.get(KEYS.gear), null);
+if (gear === null) {
+  gear = ['Sony α7V','14mm GM','35mm','70-200mm','200-600mm','DJI Mini 5 Pro','Stativ','L-Bracket','Ersatzakkus','Speicherkarten'];
+  store.set(KEYS.gear, JSON.stringify(gear));
+}
+/* Bereits vorhandene Freitext-Equipment-Einträge in die Liste übernehmen */
+(function mergeExistingEquipment(){
+  let changed=false;
+  for (const a of activities){ if (a.type==='foto' && Array.isArray(a.equipment)){ for (const e of a.equipment){ if (e && !gear.includes(e)){ gear.push(e); changed=true; } } } }
+  if (changed) store.set(KEYS.gear, JSON.stringify(gear));
+})();
 
 /* Migration: früheres Hotel-Feld „Adresse" ins neue Feld „Ort" übernehmen */
 (function migrateHotelCity(){
@@ -794,13 +872,13 @@ let autoTrips  = safeParse(store.get(KEYS.autoTrips), []);
   for (const h of hotels){ if (h.address && !h.city){ h.city = h.address; delete h.address; changed=true; } }
   if (changed) store.set(KEYS.hotels, JSON.stringify(hotels));
 })();
-const DATA = { trip:['trips',KEYS.trips], stop:['stops',KEYS.stops], hotel:['hotels',KEYS.hotels], flight:['flights',KEYS.flights], activity:['activities',KEYS.activities], photo:['activities',KEYS.activities], pack:['packing',KEYS.packing], todo:['todos',KEYS.todos] };
-const REFS = { trips:()=>trips, stops:()=>stops, hotels:()=>hotels, flights:()=>flights, activities:()=>activities, packing:()=>packing, todos:()=>todos };
+const DATA = { trip:['trips',KEYS.trips], stop:['stops',KEYS.stops], hotel:['hotels',KEYS.hotels], flight:['flights',KEYS.flights], car:['cars',KEYS.cars], activity:['activities',KEYS.activities], photo:['activities',KEYS.activities], pack:['packing',KEYS.packing], todo:['todos',KEYS.todos] };
+const REFS = { trips:()=>trips, stops:()=>stops, hotels:()=>hotels, flights:()=>flights, cars:()=>cars, activities:()=>activities, packing:()=>packing, todos:()=>todos };
 function arr(type){ return REFS[DATA[type][0]](); }
 function setArr(type, val){
   const name = DATA[type][0];
   if (name==='trips') trips=val; else if (name==='stops') stops=val; else if (name==='hotels') hotels=val;
-  else if (name==='flights') flights=val; else if (name==='activities') activities=val;
+  else if (name==='flights') flights=val; else if (name==='cars') cars=val; else if (name==='activities') activities=val;
   else if (name==='packing') packing=val; else if (name==='todos') todos=val;
 }
 function persist(type){ store.set(DATA[type][1], JSON.stringify(arr(type))); }
@@ -1000,7 +1078,7 @@ function renderWorldCard(){
 /* Länder-Auswahl mit Suche – für kleine Länder, die man schlecht antippen kann */
 let pickerFilter='';
 function openPicker(){ pickerFilter=''; const s=$('picker-search'); if(s) s.value=''; renderPickerList(); $('picker-screen').classList.add('open'); }
-function closePicker(){ $('picker-screen').classList.remove('open'); const s=$('picker-search'); if(s) s.blur(); }
+function closePicker(){ $('picker-screen').classList.remove('open','settled'); const s=$('picker-search'); if(s) s.blur(); }
 function filterPicker(v){ pickerFilter=(v||'').toLowerCase(); renderPickerList(); }
 function renderPickerList(){
   const q = pickerFilter;
@@ -1053,7 +1131,7 @@ function openImport(){
   renderImportStep1();
   $('import-screen').classList.add('open');
 }
-function closeImport(){ $('import-screen').classList.remove('open'); }
+function closeImport(){ $('import-screen').classList.remove('open','settled'); }
 
 function renderImportStep1(err){
   $('import-body').innerHTML = `
@@ -1207,6 +1285,7 @@ function countdownParts(t){
 const ICON_PLANE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z"/></svg>';
 const ICON_BED = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 7a1 1 0 0 0-2 0v11a1 1 0 0 0 2 0v-2h16v2a1 1 0 0 0 2 0v-7a4 4 0 0 0-4-4H4V7Zm0 4h5a2 2 0 0 1 2 2v1H4v-3Zm9 3v-1a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1h-7Z"/></svg>';
 const ICON_PIN = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 4.7 6.2 12.3 6.4 12.6a.8.8 0 0 0 1.2 0C12.8 21.3 19 13.7 19 9a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>';
+const ICON_CAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 11l1.5-4.3A2 2 0 0 1 8.4 5.3h7.2a2 2 0 0 1 1.9 1.4L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v.5a1.5 1.5 0 0 1-3 0V18H8v.5a1.5 1.5 0 0 1-3 0V18H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5Zm2.1-.5h9.8l-1-2.9a.5.5 0 0 0-.5-.35H8.6a.5.5 0 0 0-.5.35L7.1 10.5ZM6.5 13.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm11 0a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg>';
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 const ICON_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 
@@ -1392,7 +1471,7 @@ async function deleteTripById(id){
   if(!ok) return;
   if (idbReady) { for (const a of activities.filter(x=>x.tripId===id)) for (const ref of (a.images||[])) if(!isDataUri(ref)) await idbDelete(ref); }
   setArr('trip', trips.filter(x=>x.id!==id)); persist('trip');
-  ['stop','hotel','flight','activity','pack','todo'].forEach(tp=>{ setArr(tp, arr(tp).filter(x=>x.tripId!==id)); persist(tp); });
+  ['stop','hotel','flight','car','activity','pack','todo'].forEach(tp=>{ setArr(tp, arr(tp).filter(x=>x.tripId!==id)); persist(tp); });
   // Merkliste aufräumen; besuchte Länder bleiben erhalten
   if (autoTrips.includes(id)) { autoTrips = autoTrips.filter(x=>x!==id); store.set(KEYS.autoTrips, JSON.stringify(autoTrips)); }
   renderHome(); showToast('Gelöscht');
@@ -1403,7 +1482,7 @@ let currentTripId = null, activeTab = 'overview';
 const TABS = [['overview','Übersicht'],['route','Route'],['photos','Fotografie']];
 
 function openTripScreen(id){ currentTripId=id; activeTab='overview'; renderTripScreen(); $('trip-screen').classList.add('open'); }
-function closeTripScreen(){ $('trip-screen').classList.remove('open'); currentTripId=null; renderHome(); }
+function closeTripScreen(){ $('trip-screen').classList.remove('open','settled'); currentTripId=null; renderHome(); }
 function currentTrip(){ return trips.find(t=>t.id===currentTripId); }
 function switchTab(k){ activeTab=k; renderTripScreen(); }
 
@@ -1514,89 +1593,136 @@ function nightsBetween(a, b){
   return Math.max(0, Math.round((d2-d1)/86400000));
 }
 function renderRouteTab(t){
-  // Stopps, Flüge, Hotels und Aktivitäten laufen chronologisch in einer Zeitleiste zusammen
-  const prio = { flight:0, hotel:1, activity:2, stop:3 };
-  const items = [];
-  stops.filter(s=>s.tripId===t.id).forEach(s=> items.push({ art:'stop', datum:s.arrival||'', zeit:'', o:s }));
-  flights.filter(f=>f.tripId===t.id).forEach(f=> items.push({ art:'flight', datum:f.date||'', zeit:f.time||'', o:f }));
-  hotels.filter(h=>h.tripId===t.id).forEach(h=> items.push({ art:'hotel', datum:h.checkin||'', zeit:'', o:h }));
-  activities.filter(a=>a.tripId===t.id && a.type!=='foto').forEach(a=> items.push({ art:'activity', datum:a.date||'', zeit:a.time||'', o:a }));
-  const list = items.sort((a,b)=>
-    ((a.datum||'9999-99-99')+(a.zeit||'~~')+prio[a.art])
-      .localeCompare((b.datum||'9999-99-99')+(b.zeit||'~~')+prio[b.art]));
+  const inRange = (d, s) => d && s.arrival && s.departure && s.arrival <= d && d <= s.departure;
+  // Bei Überlappung (Abreisetag = Ankunftstag des nächsten Stopps) gewinnt der neu beginnende Stopp
+  const findStop = (d) => { let best=null; for (const s of tripStops){ if (inRange(d,s) && (!best || s.arrival > best.arrival)) best=s; } return best; };
+  const tripStops   = stops.filter(s=>s.tripId===t.id);
+  const tripHotels  = hotels.filter(h=>h.tripId===t.id);
+  const tripActs    = activities.filter(a=>a.tripId===t.id && a.type!=='foto');
+  const tripFlights = flights.filter(f=>f.tripId===t.id);
+  const tripCars    = cars.filter(c=>c.tripId===t.id);
 
-  if(!list.length) return `<div class="empty glass"><b>Noch keine Route</b>Leg Stopps, Flüge, Hotels und Aktivitäten an – alles läuft hier chronologisch zusammen.</div>`
+  // Hotels & Aktivitäten automatisch per Datum einem Stopp zuordnen
+  const childOf = {}; tripStops.forEach(s=> childOf[s.id]=[]);
+  const ungrouped = [];
+  tripHotels.forEach(h=>{ const s=findStop(h.checkin); const node={art:'hotel',datum:h.checkin||'',zeit:'',o:h}; if(s) childOf[s.id].push(node); else ungrouped.push(node); });
+  tripActs.forEach(a=>{ const s=findStop(a.date); const node={art:'activity',datum:a.date||'',zeit:a.time||'',o:a}; if(s) childOf[s.id].push(node); else ungrouped.push(node); });
+
+  // Top-Level-Knoten (Stopps als Gruppen, Flüge & Mietwagen als eigene Ebene)
+  const top = [];
+  tripStops.forEach(s=> top.push({art:'stop',datum:s.arrival||'',zeit:'',prio:2,o:s}));
+  tripFlights.forEach(f=> top.push({art:'flight',datum:f.date||'',zeit:f.time||'',prio:0,o:f}));
+  tripCars.forEach(c=> top.push({art:'car',datum:c.pickupDate||'',zeit:c.pickupTime||'',prio:1,o:c}));
+  ungrouped.forEach(n=> top.push({...n, prio: n.art==='hotel'?3:4}));
+  top.sort((a,b)=> ((a.datum||'9999-99-99')+(a.zeit||'~~')+a.prio).localeCompare((b.datum||'9999-99-99')+(b.zeit||'~~')+b.prio));
+
+  if(!top.length) return `<div class="empty glass"><b>Noch keine Route</b>Leg Stopps, Flüge, Hotels, Mietwagen und Aktivitäten an – Hotels und Aktivitäten ordnen sich automatisch unter dem passenden Stopp ein.</div>`
     + `<button class="add-btn" onclick="openAddPicker()">＋ Hinzufügen</button>`;
 
-  const datumsSpalte = (iso) => {
-    const d = iso ? new Date(iso+'T00:00:00') : null;
-    return (d && !isNaN(d))
-      ? `<span class="rt-day">${String(d.getDate()).padStart(2,'0')}</span><span class="rt-mon">${['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][d.getMonth()]}</span>`
-      : `<span class="rt-day">–</span>`;
-  };
+  // Flache Render-Sequenz: Kinder direkt hinter ihren Stopp
+  const seq = [];
+  top.forEach(node=>{
+    seq.push(node);
+    if(node.art==='stop'){
+      childOf[node.o.id]
+        .sort((a,b)=> ((a.datum||'9999')+(a.zeit||'~~')).localeCompare((b.datum||'9999')+(b.zeit||'~~')))
+        .forEach(k=> seq.push({...k, child:true}));
+    }
+  });
 
-  const body = list.map((item, i) => {
-    const last = i===list.length-1;
-    const o = item.o;
-    if (item.art === 'flight') {
-      const a = splitAirport(o.from), b = splitAirport(o.to);
-      const plus = arrivalDayOffset(o);
-      const dauer = o.duration || '';
-      return swipeWrap('flight', o.id, `<div class="rt-row flight${last?' last':''}" onclick="openModal('flight','${o.id}')">
-        <div class="rt-date">${datumsSpalte(o.date)}</div>
-        <div class="rt-line"><span class="rt-plane">${ICON_PLANE}</span></div>
-        <div class="rt-body">
-          <div class="rt-name">${esc(a.code||a.city)} → ${esc(b.code||b.city)}</div>
-          <div class="rt-meta">
-            ${o.time?`<span>${esc(o.time)}${o.arrivalTime?' – '+esc(o.arrivalTime)+(plus>0?' +'+plus:''):''} Uhr</span>`:''}
-            ${dauer?`<span class="rt-nights">${esc(dauer)}</span>`:''}
-          </div>
-          ${(o.airline||o.flightNo)?`<div class="rt-sub">${esc([o.airline,o.flightNo].filter(Boolean).join(' · '))}</div>`:''}
-        </div>
-      </div>`);
-    }
-    if (item.art === 'hotel') {
-      const n = nightsBetween(o.checkin, o.checkout);
-      const ort = o.city || o.address || '';
-      return swipeWrap('hotel', o.id, `<div class="rt-row hotel${last?' last':''}" onclick="openModal('hotel','${o.id}')">
-        <div class="rt-date">${datumsSpalte(o.checkin)}</div>
-        <div class="rt-line"><span class="rt-bed">${ICON_BED}</span></div>
-        <div class="rt-body">
-          <div class="rt-name">${esc(o.name)}</div>
-          <div class="rt-meta">
-            ${(o.checkin||o.checkout)?`<span>${fmtDate(o.checkin)||'?'} – ${fmtDate(o.checkout)||'?'}</span>`:''}
-            ${n?`<span class="rt-nights amber">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
-          </div>
-          ${(ort||o.board)?`<div class="rt-sub">${esc([ort,o.board].filter(Boolean).join(' · '))}</div>`:''}
-        </div>
-      </div>`);
-    }
-    if (item.art === 'activity') {
-      return swipeWrap('activity', o.id, `<div class="rt-row activity${last?' last':''}" onclick="openModal('activity','${o.id}')">
-        <div class="rt-date">${datumsSpalte(o.date)}</div>
-        <div class="rt-line"><span class="rt-pin">${ICON_PIN}</span></div>
-        <div class="rt-body">
-          <div class="rt-name">${esc(o.name)}</div>
-          ${(o.date||o.time)?`<div class="rt-meta"><span>${fmtDate(o.date)||'?'}${o.time?' · '+esc(o.time)+' Uhr':''}</span></div>`:''}
-          ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
-        </div>
-      </div>`);
-    }
-    const n = nightsBetween(o.arrival, o.departure);
-    return swipeWrap('stop', o.id, `<div class="rt-row${last?' last':''}" onclick="openModal('stop','${o.id}')">
-      <div class="rt-date">${datumsSpalte(o.arrival)}</div>
-      <div class="rt-line"><span class="rt-dot"></span></div>
+  const body = seq.map((item,i)=> renderRouteRow(item, i===seq.length-1)).join('');
+  return `<div class="rt-list">${body}</div><button class="add-btn" onclick="openAddPicker()">＋ Hinzufügen</button>`;
+}
+function rtDateCol(iso, small){
+  const d = iso ? new Date(iso+'T00:00:00') : null;
+  const cls = small ? 'rt-date rt-cdate' : 'rt-date';
+  return (d && !isNaN(d))
+    ? `<div class="${cls}"><span class="rt-day">${String(d.getDate()).padStart(2,'0')}</span>${small?'':`<span class="rt-mon">${['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][d.getMonth()]}</span>`}</div>`
+    : `<div class="${cls}"><span class="rt-day">–</span></div>`;
+}
+function renderRouteRow(item, last){
+  const o = item.o, lc = last?' last':'';
+  if (item.art === 'flight'){
+    const a = splitAirport(o.from), b = splitAirport(o.to);
+    const plus = arrivalDayOffset(o), dauer = o.duration || '';
+    return swipeWrap('flight', o.id, `<div class="rt-row flight${lc}" onclick="openModal('flight','${o.id}')">
+      ${rtDateCol(o.date)}
+      <div class="rt-line"><span class="rt-plane">${ICON_PLANE}</span></div>
       <div class="rt-body">
-        <div class="rt-name">${esc(o.name)}</div>
+        <div class="rt-name">${esc(a.code||a.city)} → ${esc(b.code||b.city)}</div>
         <div class="rt-meta">
-          ${(o.arrival||o.departure)?`<span>${fmtDate(o.arrival)||'?'} – ${fmtDate(o.departure)||'?'}</span>`:''}
-          ${n?`<span class="rt-nights">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
+          ${o.time?`<span>${esc(o.time)}${o.arrivalTime?' – '+esc(o.arrivalTime)+(plus>0?' +'+plus:''):''} Uhr</span>`:''}
+          ${dauer?`<span class="rt-nights">${esc(dauer)}</span>`:''}
         </div>
+        ${(o.airline||o.flightNo)?`<div class="rt-sub">${esc([o.airline,o.flightNo].filter(Boolean).join(' · '))}</div>`:''}
         ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
       </div>
     </div>`);
-  }).join('');
-  return `<div class="rt-list">${body}</div><button class="add-btn" onclick="openAddPicker()">＋ Hinzufügen</button>`;
+  }
+  if (item.art === 'car'){
+    const days = nightsBetween(o.pickupDate, o.dropoffDate);
+    const route = [o.pickupPlace, o.dropoffPlace].filter(Boolean);
+    const routeTxt = route.length ? (route.length===2 && route[0]!==route[1] ? route[0]+' → '+route[1] : route[0]) : '';
+    return swipeWrap('car', o.id, `<div class="rt-row car${lc}" onclick="openModal('car','${o.id}')">
+      ${rtDateCol(o.pickupDate)}
+      <div class="rt-line"><span class="rt-car">${ICON_CAR}</span></div>
+      <div class="rt-body">
+        <div class="rt-name">${esc(o.company||'Mietwagen')}${o.vehicle?' · '+esc(o.vehicle):''}</div>
+        <div class="rt-meta">
+          ${(o.pickupDate||o.dropoffDate)?`<span>${fmtDate(o.pickupDate)||'?'} – ${fmtDate(o.dropoffDate)||'?'}</span>`:''}
+          ${days?`<span class="rt-nights" style="background:rgba(48,209,88,0.15);color:var(--green)">${days} ${days===1?'Tag':'Tage'}</span>`:''}
+        </div>
+        ${routeTxt?`<div class="rt-sub">${esc(routeTxt)}</div>`:''}
+        ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
+      </div>
+    </div>`);
+  }
+  if (item.art === 'hotel'){
+    const n = nightsBetween(o.checkin, o.checkout);
+    const ort = o.city || o.address || '';
+    const child = item.child;
+    const marker = child ? `<span class="rt-cmark bed">${ICON_BED}</span>` : `<span class="rt-bed">${ICON_BED}</span>`;
+    return swipeWrap('hotel', o.id, `<div class="rt-row hotel${child?' rt-child':''}${lc}" onclick="openModal('hotel','${o.id}')">
+      ${rtDateCol(o.checkin, child)}
+      <div class="rt-line">${marker}</div>
+      <div class="rt-body">
+        <div class="rt-name">${esc(o.name)}</div>
+        <div class="rt-meta">
+          ${(o.checkin||o.checkout)?`<span>${fmtDate(o.checkin)||'?'} – ${fmtDate(o.checkout)||'?'}</span>`:''}
+          ${n?`<span class="rt-nights amber">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
+        </div>
+        ${(ort||o.board)?`<div class="rt-sub">${esc([ort,o.board].filter(Boolean).join(' · '))}</div>`:''}
+        ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
+      </div>
+    </div>`);
+  }
+  if (item.art === 'activity'){
+    const child = item.child;
+    const marker = child ? `<span class="rt-cmark pin">${ICON_PIN}</span>` : `<span class="rt-pin">${ICON_PIN}</span>`;
+    return swipeWrap('activity', o.id, `<div class="rt-row activity${child?' rt-child':''}${lc}" onclick="openModal('activity','${o.id}')">
+      ${rtDateCol(o.date, child)}
+      <div class="rt-line">${marker}</div>
+      <div class="rt-body">
+        <div class="rt-name">${esc(o.name)}</div>
+        ${(o.date||o.time)?`<div class="rt-meta"><span>${fmtDate(o.date)||'?'}${o.time?' · '+esc(o.time)+' Uhr':''}</span></div>`:''}
+        ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
+      </div>
+    </div>`);
+  }
+  // stop (Gruppen-Header)
+  const n = nightsBetween(o.arrival, o.departure);
+  return swipeWrap('stop', o.id, `<div class="rt-row${lc}" onclick="openModal('stop','${o.id}')">
+    ${rtDateCol(o.arrival)}
+    <div class="rt-line"><span class="rt-dot"></span></div>
+    <div class="rt-body">
+      <div class="rt-name">${esc(o.name)}</div>
+      <div class="rt-meta">
+        ${(o.arrival||o.departure)?`<span>${fmtDate(o.arrival)||'?'} – ${fmtDate(o.departure)||'?'}</span>`:''}
+        ${n?`<span class="rt-nights">${n} ${n===1?'Nacht':'Nächte'}</span>`:''}
+      </div>
+      ${o.notes?`<div class="rt-notes">${esc(o.notes)}</div>`:''}
+    </div>
+  </div>`);
 }
 function renderHotelsTab(t){
   const list = hotels.filter(s=>s.tripId===t.id).sort((a,b)=>(a.checkin||'9999').localeCompare(b.checkin||'9999'));
@@ -1692,9 +1818,10 @@ function fotoCardHTML(p){
     </div>
     <div class="foto-field">
       <label>Equipment</label>
-      ${pills}
-      <input class="foto-input" value="${esc((p.equipment||[]).join(', '))}" placeholder="z.B. 14mm GM, Stativ, L-Bracket"
-             onchange="setFotoEquipment('${p.id}', this.value)">
+      <button class="foto-equip" onclick="openGearPicker('${p.id}')">
+        ${(p.equipment&&p.equipment.length) ? `<span class="foto-pills">${p.equipment.map(e=>`<span class="cat-pill pill-violet">${esc(e)}</span>`).join('')}</span>` : '<span class="foto-equip-empty">Equipment wählen …</span>'}
+        <span class="foto-equip-chevron">›</span>
+      </button>
     </div>
     <div class="foto-field">
       <label>Notizen</label>
@@ -1773,6 +1900,71 @@ async function viewFotoImage(id, idx){
 }
 function closeImgViewer(){ $('img-viewer').classList.remove('open'); $('img-viewer-img').src=''; }
 
+/* ===== AUSRÜSTUNGSLISTE (global, in Einstellungen pflegbar) ===== */
+function persistGear(){ store.set(KEYS.gear, JSON.stringify(gear)); }
+function renderGearManage(){
+  const el=$('gear-list'); if(!el) return;
+  const rows = gear.map((g,i)=>`
+    <div class="gear-row">
+      <input value="${esc(g)}" onchange="gearRename(${i}, this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      <button class="gear-del" onclick="gearRemove(${i})" aria-label="Löschen">✕</button>
+    </div>`).join('');
+  const newRow = `
+    <div class="gear-row gear-new">
+      <span class="gear-plus">＋</span>
+      <input id="gear-new-input" placeholder="Neues Equipment …"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();gearAddManage();}"
+             onblur="gearAddManage(true)">
+    </div>`;
+  el.innerHTML = rows + newRow;
+}
+function gearRename(i, val){
+  const name=(val||'').trim();
+  if(!name){ gear.splice(i,1); persistGear(); renderGearManage(); return; }
+  gear[i]=name; persistGear();
+}
+function gearRemove(i){ gear.splice(i,1); persistGear(); renderGearManage(); }
+function gearAddManage(silent){
+  const inp=$('gear-new-input'); if(!inp) return;
+  const name=inp.value.trim(); if(!name) return;
+  if(!gear.includes(name)) gear.push(name);
+  persistGear(); renderGearManage();
+  if(!silent){ const n=$('gear-new-input'); if(n) n.focus(); }
+}
+
+/* Equipment pro Foto-Ort aus der globalen Liste wählen */
+let _gearPickId=null, _gearItems=[];
+function openGearPicker(placeId){ _gearPickId=placeId; renderGearChoices(); $('gear-overlay').classList.add('open'); }
+function closeGearPicker(){ $('gear-overlay').classList.remove('open'); _gearPickId=null; renderTabContent(); loadFotoImages(); }
+function renderGearChoices(){
+  const p=activities.find(x=>x.id===_gearPickId); if(!p) return;
+  const sel=p.equipment||[];
+  _gearItems=[...gear]; sel.forEach(s=>{ if(!_gearItems.includes(s)) _gearItems.push(s); });
+  const check='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  $('gear-choices').innerHTML = _gearItems.map((it,idx)=>{
+    const on=sel.includes(it);
+    return `<button class="gear-choice${on?' on':''}" onclick="toggleGearForPlace(${idx})"><span class="gc-check">${check}</span><span class="gc-label">${esc(it)}</span></button>`;
+  }).join('') || '<div class="foto-equip-empty" style="padding:8px 4px">Noch kein Equipment – füge unten etwas hinzu oder lege es in den Einstellungen an.</div>';
+}
+function toggleGearForPlace(idx){
+  const item=_gearItems[idx]; if(item===undefined) return;
+  const p=activities.find(x=>x.id===_gearPickId); if(!p) return;
+  if(!p.equipment) p.equipment=[];
+  const i=p.equipment.indexOf(item);
+  if(i>=0) p.equipment.splice(i,1); else p.equipment.push(item);
+  persist('activity');
+  renderGearChoices();
+}
+function gearAddFromPicker(){
+  const inp=$('gear-add-input'); if(!inp) return;
+  const name=inp.value.trim(); if(!name) return;
+  if(!gear.includes(name)){ gear.push(name); persistGear(); }
+  const p=activities.find(x=>x.id===_gearPickId);
+  if(p){ if(!p.equipment) p.equipment=[]; if(!p.equipment.includes(name)) p.equipment.push(name); persist('activity'); }
+  inp.value='';
+  renderGearChoices();
+}
+
 const PACK_TEMPLATE = [['Reisepass','Dokumente'],['Impfpass','Dokumente'],['Auslandskrankenversicherung','Dokumente'],['Flugtickets / Buchungen','Dokumente'],['Ladekabel & Netzteil','Technik'],['Powerbank','Technik'],['Reiseadapter','Technik'],['Kamera-Body','Fotografie'],['Objektive','Fotografie'],['Speicherkarten','Fotografie'],['Ersatzakkus','Fotografie'],['Stativ','Fotografie'],['Sonnencreme','Hygiene & Gesundheit'],['Mückenschutz','Hygiene & Gesundheit'],['Reiseapotheke','Hygiene & Gesundheit']];
 function renderPackingTab(t){
   const list = packing.filter(s=>s.tripId===t.id);
@@ -1847,7 +2039,7 @@ function editCurrentActivity(){
   const a = activities.find(x=>x.id===currentActivityId); if(!a) return;
   openModal(a.type==='foto' ? 'photo' : 'activity', currentActivityId);
 }
-function closeActivityScreen(){ $('activity-screen').classList.remove('open'); currentActivityId=null; renderTabContent(); }
+function closeActivityScreen(){ $('activity-screen').classList.remove('open','settled'); currentActivityId=null; renderTabContent(); }
 async function renderActivityScreen(){
   const a = activities.find(x=>x.id===currentActivityId);
   if (!a) { closeActivityScreen(); return; }
@@ -1872,9 +2064,9 @@ async function renderActivityScreen(){
 }
 
 /* ===== FORMULAR-MODAL ===== */
-const TITLES = { trip:'Reise', stop:'Stopp', hotel:'Hotel', flight:'Flug', activity:'Aktivität', photo:'Fotografie', pack:'Gegenstand', todo:'Aufgabe' };
+const TITLES = { trip:'Reise', stop:'Stopp', hotel:'Hotel', flight:'Flug', car:'Mietwagen', activity:'Aktivität', photo:'Fotografie', pack:'Gegenstand', todo:'Aufgabe' };
 /* Überschriften der Formulare – „Neuer Stopp" / „Stopp bearbeiten" statt „Neu – Stopp" */
-const TITLE_NEW = { trip:'Neue Reise', stop:'Neuer Stopp', hotel:'Neues Hotel', flight:'Neuer Flug',
+const TITLE_NEW = { trip:'Neue Reise', stop:'Neuer Stopp', hotel:'Neues Hotel', flight:'Neuer Flug', car:'Neuer Mietwagen',
   activity:'Neue Aktivität', photo:'Neue Foto-Session', pack:'Neuer Gegenstand', todo:'Neue Aufgabe' };
 function modalTitle(type, id){ return id ? `${TITLES[type]} bearbeiten` : (TITLE_NEW[type] || 'Neuer Eintrag'); }
 const SCHEMAS = {
@@ -1895,7 +2087,8 @@ const SCHEMAS = {
     { key:'checkin', label:'Check-in', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
     { key:'checkout', label:'Check-out', type:'text', date:true, placeholder:'z.B. 12.09.2026', pair:'end' },
     { key:'city', label:'Ort', type:'text', placeholder:'z.B. Windhoek, Namibia' },
-    { key:'board', label:'Verpflegung', type:'text', placeholder:'z.B. Frühstück' }
+    { key:'board', label:'Verpflegung', type:'text', placeholder:'z.B. Frühstück' },
+    { key:'notes', label:'Notizen', type:'textarea' }
   ],
   flight: [
     { key:'from', label:'Von', type:'text', required:true, placeholder:'z.B. Frankfurt (FRA)', pair:'start' },
@@ -1909,11 +2102,23 @@ const SCHEMAS = {
     { key:'flightNo', label:'Flugnummer', type:'text', placeholder:'z.B. 4Y 132', pair:'start' },
     { key:'cabin', label:'Klasse', type:'text', placeholder:'z.B. Economy', pair:'end' },
     { key:'seat', label:'Sitzplatz', type:'text', placeholder:'z.B. 32A', pair:'start' },
-    { key:'bookingRef', label:'Buchungsnummer', type:'text', placeholder:'z.B. 9DXP4O', pair:'end' }
+    { key:'bookingRef', label:'Buchungsnummer', type:'text', placeholder:'z.B. 9DXP4O', pair:'end' },
+    { key:'notes', label:'Notizen', type:'textarea' }
+  ],
+  car: [
+    { key:'company', label:'Anbieter', type:'text', required:true, placeholder:'z.B. Europcar', pair:'start' },
+    { key:'vehicle', label:'Fahrzeug', type:'text', placeholder:'z.B. Toyota Hilux', pair:'end' },
+    { key:'pickupPlace', label:'Abholung Ort', type:'text', placeholder:'z.B. Windhoek Flughafen', pair:'start' },
+    { key:'dropoffPlace', label:'Rückgabe Ort', type:'text', placeholder:'z.B. Windhoek Flughafen', pair:'end' },
+    { key:'pickupDate', label:'Abholung am', type:'text', date:true, placeholder:'z.B. 10.09.2026', pair:'start' },
+    { key:'pickupTime', label:'Abholung um', type:'time', pair:'end' },
+    { key:'dropoffDate', label:'Rückgabe am', type:'text', date:true, placeholder:'z.B. 22.09.2026', pair:'start' },
+    { key:'dropoffTime', label:'Rückgabe um', type:'time', pair:'end' },
+    { key:'bookingRef', label:'Buchungsnummer', type:'text', placeholder:'z.B. 9DXP4O' },
+    { key:'notes', label:'Notizen', type:'textarea' }
   ],
   activity: [
     { key:'name', label:'Aktivität', type:'text', required:true, placeholder:'z.B. Sundowner Düne 45' },
-    { key:'stopId', label:'Stopp', type:'select-stop' },
     { key:'date', label:'Datum', type:'text', date:true, placeholder:'z.B. 09.09.2026', pair:'start' },
     { key:'time', label:'Uhrzeit', type:'time', pair:'end' },
     { key:'notes', label:'Notizen', type:'textarea' }
@@ -1976,6 +2181,7 @@ function openAddPicker(){
     ['stop','Stopp','<span class="ac-dot"></span>','ac-stop'],
     ['flight','Flug',ICON_PLANE,'ac-flight'],
     ['hotel','Hotel',ICON_BED,'ac-hotel'],
+    ['car','Mietwagen',ICON_CAR,'ac-car'],
     ['activity','Aktivität',ICON_PIN,'ac-activity']
   ];
   $('add-choices').innerHTML = opts.map(([type,label,icon,cls])=>
@@ -2063,17 +2269,18 @@ async function persistFormImages(){
 }
 
 /* ===== BACKUP (Payload) – von Cloud-Backup genutzt ===== */
-function buildBackupPayload(){ return { app:'reiseplaner', version:1, exportedAt:new Date().toISOString(), trips, stops, hotels, flights, activities, packing, todos, visited, autoTrips }; }
+function buildBackupPayload(){ return { app:'reiseplaner', version:1, exportedAt:new Date().toISOString(), trips, stops, hotels, flights, cars, activities, packing, todos, visited, autoTrips, gear }; }
 async function buildBackupPayloadFull(){ const base=buildBackupPayload(); if(idbReady) base.imageStore = await idbAll(); return base; }
 async function applyBackup(rawText){
   let p; try { p=JSON.parse(rawText); } catch(e){ notify('Das ist keine gültige Backup-Datei.'); return; }
   if (!p || !Array.isArray(p.trips)){ notify('Diese Datei sieht nicht wie ein gültiges Reiseplaner-Backup aus.'); return; }
   const ok=await showDialog(`${p.trips.length} Reise(n) gefunden. Dies ersetzt alle aktuellen Daten in dieser App.`,{title:'Backup wiederherstellen?',okText:'Wiederherstellen'});
   if(!ok) return;
-  trips=p.trips||[]; stops=p.stops||[]; hotels=p.hotels||[]; flights=p.flights||[]; activities=p.activities||[]; packing=p.packing||[]; todos=p.todos||[];
+  trips=p.trips||[]; stops=p.stops||[]; hotels=p.hotels||[]; flights=p.flights||[]; cars=p.cars||[]; activities=p.activities||[]; packing=p.packing||[]; todos=p.todos||[];
   visited=Array.isArray(p.visited)?p.visited:[]; store.set(KEYS.visited, JSON.stringify(visited));
   autoTrips=Array.isArray(p.autoTrips)?p.autoTrips:[]; store.set(KEYS.autoTrips, JSON.stringify(autoTrips));
-  ['trip','stop','hotel','flight','activity','pack','todo'].forEach(persist);
+  if (Array.isArray(p.gear)) { gear=p.gear; store.set(KEYS.gear, JSON.stringify(gear)); }
+  ['trip','stop','hotel','flight','car','activity','pack','todo'].forEach(persist);
   if (idbReady) { await idbClear(); if (Array.isArray(p.imageStore)) { for (const rec of p.imageStore) { if (rec && rec.id) await idbPut(rec.id, rec.data); } } }
   await migrateInlineImages();
   renderHome();
@@ -2086,8 +2293,8 @@ let cloudCfg=safeParse(store.get(CLOUD_CFG_KEY),null);
 let _cloudTimer=null,_cloudBusy=false;
 function toggleCloudCfg(){ const el=$('cloud-cfg'); const show=el.style.display==='none'; el.style.display=show?'':'none'; const c=$('cloud-row-chevron'); if(c) c.textContent=show?'⌄':'›'; if(show) loadCloudCfgUI(); }
 function cloudRowTap(){ toggleCloudCfg(); }
-function openSettings(){ renderAppLockUI(); renderCloudRow(); $('settings-screen').classList.add('open'); }
-function closeSettings(){ $('settings-screen').classList.remove('open'); }
+function openSettings(){ renderAppLockUI(); renderCloudRow(); renderGearManage(); $('settings-screen').classList.add('open'); }
+function closeSettings(){ $('settings-screen').classList.remove('open','settled'); }
 function renderCloudRow(){ const sub=$('cloud-row-sub'); if(!sub) return; if(cloudReady()&&cloudCfg&&cloudCfg.lastOk) sub.textContent='Aktiv · zuletzt '+new Date(cloudCfg.lastOk).toLocaleDateString('de-DE'); else if(cloudReady()) sub.textContent='Eingerichtet – noch kein Backup gelaufen'; else sub.textContent='Verschlüsselt zu GitHub – einrichten'; }
 function loadCloudCfgUI(){ if(!cloudCfg){ renderCloudStatus(); return; } $('cb-repo').value=cloudCfg.repo||''; $('cb-token').value=cloudCfg.token||''; $('cb-pass').value=cloudCfg.pass||''; $('cb-auto').checked=cloudCfg.auto!==false; renderCloudStatus(); }
 function saveCloudCfg(){ cloudCfg={ repo:$('cb-repo').value.trim(), token:$('cb-token').value.trim(), pass:$('cb-pass').value, auto:$('cb-auto').checked, lastOk:cloudCfg&&cloudCfg.lastOk||null }; store.set(CLOUD_CFG_KEY,JSON.stringify(cloudCfg)); }
@@ -2187,6 +2394,12 @@ document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); 
   await migrateInlineImages();
   renderHome();
   initAppLock();
+  // Nach Abschluss der Öffnen-Animation die Transform entfernen (sauberes iOS-Scrollen)
+  document.querySelectorAll('.screen').forEach(sc=>{
+    sc.addEventListener('transitionend', e=>{
+      if (e.target===sc && e.propertyName==='transform' && sc.classList.contains('open')) sc.classList.add('settled');
+    });
+  });
   // Service Worker registrieren (Offline-Fähigkeit); scheitert leise wenn nicht unterstützt (z.B. file://)
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('sw.js').catch(() => {});
