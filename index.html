@@ -168,7 +168,8 @@
   #trip-tiles .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   /* Swipe-Architektur wie Finanzen: tile-wrap clippt, tile-slider verschiebt sich */
   .tile-wrap { position: relative; border-radius: 26px; overflow: hidden; touch-action: pan-y; }
-  .tile-slider { display: flex; flex-direction: row; width: 100%; transition: transform 0.42s var(--spring); will-change: transform; }
+  .tile-slider { display: flex; flex-direction: row; width: 100%; transition: transform 0.42s var(--spring); }
+  .tile-slider.swiping { will-change: transform; }
   .tile-slider.no-transition { transition: none; }
   .tile-slider .trip-tile { flex: 0 0 100%; width: 100%; }
   /* Einträge (Hotels, Flüge, Stopps …) nutzen dieselbe Swipe-Mechanik wie die Reisekacheln */
@@ -325,6 +326,13 @@
   .gear-add-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
   .gear-add-row .foto-input { flex: 1; }
   .gear-add-btn { flex: 0 0 auto; width: 48px; padding: 11px 0; font-size: 1.2rem; }
+  /* Ausrüstung: Kategorie-Gruppen in der Verwaltung */
+  .gear-cat + .gear-cat { margin-top: 6px; }
+  .gear-cat-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-2); font-weight: 700; padding: 12px 14px 6px; }
+  .gear-cat-items { }
+  /* Ausrüstung: Kategorie-Überschriften im Auswahl-Sheet */
+  .gc-cat-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-2); font-weight: 700; padding: 10px 4px 2px; }
+  .gc-cat-label:first-child { padding-top: 0; }
   .rt-sub { margin-top: 4px; font-size: 0.72rem; color: var(--muted-2); }
   /* Inhalt */
   .rt-body { min-width: 0; padding: 0 2px 24px 8px; }
@@ -571,18 +579,6 @@
 </div>
 
 <!-- ============ AKTIVITÄTS-DETAIL SCREEN ============ -->
-<div class="screen" id="activity-screen">
-  <div class="screen-topbar">
-    <button class="screen-back" onclick="closeActivityScreen()">‹</button>
-    <div class="screen-title">
-      <h2 id="as-name">Aktivität</h2>
-      <p id="as-sub">&nbsp;</p>
-    </div>
-    <button class="icon-btn" aria-label="Bearbeiten" onclick="editCurrentActivity()">✎</button>
-  </div>
-  <div id="activity-detail"></div>
-</div>
-
 <!-- ============ REISEPLAN-IMPORT ============ -->
 <div class="screen" id="import-screen">
   <div class="screen-topbar">
@@ -645,9 +641,19 @@
     </button>
   </div>
 
-  <div class="section-label">Ausrüstung</div>
+  <div class="section-label">Fotografie</div>
   <div class="settings-group">
-    <div class="gear-manage" id="gear-list"></div>
+    <button class="settings-row" onclick="gearRowTap()">
+      <span class="sr-icon">📷</span>
+      <span class="sr-body">
+        <span class="sr-title">Ausrüstung</span>
+        <span class="sr-sub" id="gear-row-sub">Kameras · Objektive · Drohne · Zubehör</span>
+      </span>
+      <span class="sr-chevron" id="gear-row-chevron">›</span>
+    </button>
+    <div id="gear-cfg" class="settings-detail" style="display:none">
+      <div class="gear-manage" id="gear-list"></div>
+    </div>
   </div>
 </div>
 
@@ -704,14 +710,9 @@
 <!-- Equipment-Auswahl (pro Foto-Ort aus der globalen Liste) -->
 <div class="overlay" id="gear-overlay" onclick="if(event.target===this)closeGearPicker()">
   <div class="modal" style="max-width:480px">
-    <div class="grabber"></div>
-    <h2>Equipment wählen</h2>
+    <div class="grabber" onclick="closeGearPicker()"></div>
+    <h2>Ausrüstung wählen</h2>
     <div class="gear-choices" id="gear-choices"></div>
-    <div class="gear-add-row">
-      <input type="text" id="gear-add-input" class="foto-input" placeholder="Neues Equipment …"
-             onkeydown="if(event.key==='Enter'){event.preventDefault();gearAddFromPicker();}">
-      <button class="btn btn-secondary gear-add-btn" onclick="gearAddFromPicker()">＋</button>
-    </div>
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeGearPicker()">Fertig</button></div>
   </div>
 </div>
@@ -852,17 +853,33 @@ let todos      = safeParse(store.get(KEYS.todos), []);
 let visited    = safeParse(store.get(KEYS.visited), []);
 let autoTrips  = safeParse(store.get(KEYS.autoTrips), []);
 
-/* Globale Ausrüstungsliste – geräteweit, in den Einstellungen pflegbar.
-   Beim ersten Start mit Jörgs bekannter Ausrüstung vorbefüllt. */
+/* Ausrüstung – global, kategorisiert (Kameras, Objektive, Drohne, Zubehör), in Einstellungen pflegbar. */
+const GEAR_CATS = ['Kameras','Objektive','Drohne','Zubehör'];
+function emptyGear(){ return { 'Kameras':[], 'Objektive':[], 'Drohne':[], 'Zubehör':[] }; }
+function gearClassify(name){
+  const s=(name||'').toLowerCase();
+  if (/dji|drohne|drone|mavic|\bmini\s?\d|\bair\s?\d/.test(s)) return 'Drohne';
+  if (/\d+\s?mm|\bgm\b|objektiv|\blens\b|f1\.|f2\.|f\/|\d+-\d+/.test(s)) return 'Objektive';
+  if (/α|alpha|\ba7|\ba1\b|\ba9\b|kamera|camera|\bbody\b|eos|x-t|gfx|\br5\b|\br6\b/.test(s)) return 'Kameras';
+  return 'Zubehör';
+}
+function normalizeGear(g){ const o=emptyGear(); for(const c of GEAR_CATS) if(Array.isArray(g&&g[c])) o[c]=g[c].slice(); return o; }
+function gearAll(){ return GEAR_CATS.reduce((acc,c)=>acc.concat(gear[c]||[]),[]); }
 let gear = safeParse(store.get(KEYS.gear), null);
 if (gear === null) {
-  gear = ['Sony α7V','14mm GM','35mm','70-200mm','200-600mm','DJI Mini 5 Pro','Stativ','L-Bracket','Ersatzakkus','Speicherkarten'];
+  gear = { 'Kameras':['Sony α7V'], 'Objektive':['14mm GM','35mm','70-200mm','200-600mm'], 'Drohne':['DJI Mini 5 Pro'], 'Zubehör':['Stativ','L-Bracket','Ersatzakkus','Speicherkarten'] };
   store.set(KEYS.gear, JSON.stringify(gear));
+} else if (Array.isArray(gear)) {
+  const flat=gear; gear=emptyGear();
+  flat.forEach(n=>{ if(n){ const c=gearClassify(n); if(!gear[c].includes(n)) gear[c].push(n); } });
+  store.set(KEYS.gear, JSON.stringify(gear));
+} else {
+  gear = normalizeGear(gear);
 }
-/* Bereits vorhandene Freitext-Equipment-Einträge in die Liste übernehmen */
-(function mergeExistingEquipment(){
+/* Vorhandene Ausrüstung aus Foto-Orten übernehmen */
+(function mergeExistingGear(){
   let changed=false;
-  for (const a of activities){ if (a.type==='foto' && Array.isArray(a.equipment)){ for (const e of a.equipment){ if (e && !gear.includes(e)){ gear.push(e); changed=true; } } } }
+  for (const a of activities){ if (a.type==='foto' && Array.isArray(a.equipment)){ for (const e of a.equipment){ if (e && !gearAll().includes(e)){ gear[gearClassify(e)].push(e); changed=true; } } } }
   if (changed) store.set(KEYS.gear, JSON.stringify(gear));
 })();
 
@@ -1118,6 +1135,7 @@ function renderPickerList(){
    die Einträge in die AKTUELLE Reise ein. Nichts wird ohne Vorschau übernommen. */
 const IMPORT_TYPES = [
   ['stops','stop','Stopps'], ['flights','flight','Flüge'], ['hotels','hotel','Hotels'],
+  ['cars','car','Mietwagen'],
   ['activities','activity','Aktivitäten'], ['photos','photo','Fotografie'],
   ['packing','pack','Packliste'], ['todos','todo','Checkliste']
 ];
@@ -1191,8 +1209,8 @@ function parseImport(){
       // Pflichtfelder prüfen – unvollständige Einträge überspringen
       const fehlt=schema.filter(f=>f.required && !obj[f.key]);
       if(fehlt.length) continue;
-      const label = type==='flight' ? `${obj.from} → ${obj.to}` : obj.name;
-      const datum = obj.date||obj.checkin||obj.arrival||'';
+      const label = type==='flight' ? `${obj.from} → ${obj.to}` : (type==='car' ? [obj.company, obj.vehicle].filter(Boolean).join(' · ') : obj.name);
+      const datum = obj.date||obj.checkin||obj.arrival||obj.pickupDate||'';
       // Schon vorhanden? Gleicher Name (und Datum, falls vorhanden) in derselben Reise.
       // Dann nicht vorauswählen – sonst legt ein zweiter Import alles doppelt an.
       const t = currentTrip();
@@ -1202,9 +1220,11 @@ function parseImport(){
         if (type==='activity' && x.type==='foto') return false;
         const gleich = type==='flight'
           ? (x.from===obj.from && x.to===obj.to)
-          : ((x.name||'').trim().toLowerCase() === (obj.name||'').trim().toLowerCase());
+          : type==='car'
+            ? ((x.company||'').trim().toLowerCase() === (obj.company||'').trim().toLowerCase())
+            : ((x.name||'').trim().toLowerCase() === (obj.name||'').trim().toLowerCase());
         if (!gleich) return false;
-        const xd = x.date||x.checkin||x.arrival||'';
+        const xd = x.date||x.checkin||x.arrival||x.pickupDate||'';
         return !datum || !xd || xd===datum;
       });
       const sub = [titel, datum?fmtDate(datum):'', obj.time?obj.time+' Uhr':''].filter(Boolean).join(' · ');
@@ -1438,6 +1458,7 @@ function attachSwipeGeneric(wrap, onDelete, onEdit) {
       if (Math.abs(mx) < 4 && Math.abs(my) < 4) return;
       decided = true;
       horizontal = Math.abs(mx) > Math.abs(my);
+      if (horizontal) slider.classList.add('swiping');
     }
     if (!horizontal) { if (openAtStart) { settle(false); openAtStart = false; } return; }
     ev.stopPropagation();
@@ -1451,6 +1472,7 @@ function attachSwipeGeneric(wrap, onDelete, onEdit) {
   wrap.addEventListener('touchend', () => {
     if (!dragging) return;
     dragging = false;
+    slider.classList.remove('swiping');
     if (!horizontal) { settle(openAtStart); return; }
     const R = getReveal();
     settle(openAtStart ? curX < -R / 2 : curX < -THRESHOLD);
@@ -1534,6 +1556,7 @@ function renderOverviewTab(t){
     </div>` : ''}
     <div class="ov-stats">
       <div class="stat"><div class="stat-label">Flüge</div><div class="stat-value">${c('flight')}</div></div>
+      <div class="stat"><div class="stat-label">Mietwagen</div><div class="stat-value">${c('car')}</div></div>
       <div class="stat"><div class="stat-label">Hotels</div><div class="stat-value">${c('hotel')}</div></div>
       <div class="stat"><div class="stat-label">Aktivitäten</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type!=='foto').length}</div></div>
       <div class="stat"><div class="stat-label">Fotografie</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type==='foto').length}</div></div>
@@ -1583,7 +1606,6 @@ function addPackInline(silent){
   renderTabContent();
   if (!silent) { const next=$('pack-new'); if(next) next.focus(); }
 }
-function stopLabel(id){ const s=stops.find(x=>x.id===id); return s?s.name:''; }
 
 /* Route als Zeitleiste: durchgehende Linie, Punkt je Stopp, Datum als eigene Spalte */
 function nightsBetween(a, b){
@@ -1591,6 +1613,19 @@ function nightsBetween(a, b){
   const d1=new Date(a+'T00:00:00'), d2=new Date(b+'T00:00:00');
   if(isNaN(d1)||isNaN(d2)) return 0;
   return Math.max(0, Math.round((d2-d1)/86400000));
+}
+/* Flughafen „Frankfurt (FRA)" in Stadt + Code zerlegen */
+function splitAirport(s){
+  const t = String(s||'').trim();
+  const m = t.match(/^(.*?)\s*\(([A-Za-z]{3})\)\s*$/);
+  return m ? { city:m[1].trim(), code:m[2].toUpperCase() } : { city:t, code:'' };
+}
+/* Wie viele Tage später landet der Flug? Aus den echten Daten, keine Vermutung. */
+function arrivalDayOffset(f){
+  if(!f.date || !f.arrivalDate) return 0;
+  const a = new Date(f.date+'T00:00:00'), b = new Date(f.arrivalDate+'T00:00:00');
+  if(isNaN(a)||isNaN(b)) return 0;
+  return Math.round((b-a)/86400000);
 }
 function renderRouteTab(t){
   const inRange = (d, s) => d && s.arrival && s.departure && s.arrival <= d && d <= s.departure;
@@ -1724,72 +1759,6 @@ function renderRouteRow(item, last){
     </div>
   </div>`);
 }
-function renderHotelsTab(t){
-  const list = hotels.filter(s=>s.tripId===t.id).sort((a,b)=>(a.checkin||'9999').localeCompare(b.checkin||'9999'));
-  const body = list.length ? `<div class="list">${list.map(h=>{const sn=stopLabel(h.stopId);return swipeWrap('hotel', h.id, `<div class="entry"><div class="entry-main"><div class="entry-name">${esc(h.name)}</div>${(h.checkin||h.checkout)?`<div class="entry-sub">${fmtDate(h.checkin)||'?'} – ${fmtDate(h.checkout)||'?'}</div>`:''}${h.address?`<div class="entry-sub">${esc(h.address)}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">${h.price?`<div class="entry-name">${esc(h.price)}</div>`:''}</div></div>`);}).join('')}</div>`
-    : `<div class="empty glass"><b>Noch kein Hotel</b>Trage Hotels, Lodges oder Camps mit Check-in/-out und Buchungsdaten ein.</div>`;
-  return body + `<button class="add-btn" onclick="openModal('hotel')">＋ Hotel hinzufügen</button>`;
-}
-/* Zerlegt "Frankfurt (FRA)" in Kürzel und Stadt. Ohne Klammern bleibt alles Stadt. */
-function splitAirport(s){
-  const t = String(s||'').trim();
-  const m = t.match(/^(.*?)\s*\(([A-Za-z]{3})\)\s*$/);
-  return m ? { city:m[1].trim(), code:m[2].toUpperCase() } : { city:t, code:'' };
-}
-/* Wie viele Tage später landet der Flug? Aus den echten Daten, keine Vermutung. */
-function arrivalDayOffset(f){
-  if(!f.date || !f.arrivalDate) return 0;
-  const a = new Date(f.date+'T00:00:00'), b = new Date(f.arrivalDate+'T00:00:00');
-  if(isNaN(a)||isNaN(b)) return 0;
-  return Math.round((b-a)/86400000);
-}
-function flightCardHTML(f){
-  const a = splitAirport(f.from), b = splitAirport(f.to);
-  const plus = arrivalDayOffset(f);
-  const dauer = f.duration || '';
-  const pills = [
-    f.cabin  ? `<span class="cat-pill pill-blue">${esc(f.cabin)}</span>` : '',
-    f.seat   ? `<span class="cat-pill pill-violet">Sitz ${esc(f.seat)}</span>` : '',
-    f.airline||f.flightNo ? `<span class="cat-pill pill-petrol">${esc([f.airline,f.flightNo].filter(Boolean).join(' · '))}</span>` : ''
-  ].filter(Boolean).join('');
-  return `<div class="fl-card">
-    <div class="fl-head">
-      <span class="fl-date">${f.date?esc(fmtDate(f.date)):'Kein Datum'}</span>
-      ${f.bookingRef?`<span class="fl-ref">Buchung ${esc(f.bookingRef)}</span>`:''}
-    </div>
-    <div class="fl-route">
-      <div class="fl-port">
-        <div class="fl-code">${esc(a.code||a.city.slice(0,3).toUpperCase()||'—')}</div>
-        <div class="fl-city">${esc(a.city)||'&nbsp;'}</div>
-        <div class="fl-time">${f.time?esc(f.time):'—'}</div>
-      </div>
-      <div class="fl-mid">
-        <div class="fl-dur">${dauer?esc(dauer):'&nbsp;'}</div>
-        <div class="fl-line"><span class="fl-plane">${ICON_PLANE}</span></div>
-      </div>
-      <div class="fl-port right">
-        <div class="fl-code">${esc(b.code||b.city.slice(0,3).toUpperCase()||'—')}</div>
-        <div class="fl-city">${esc(b.city)||'&nbsp;'}</div>
-        <div class="fl-time">${f.arrivalTime?esc(f.arrivalTime):'—'}${plus>0?`<span class="fl-plus">+${plus}</span>`:''}</div>
-      </div>
-    </div>
-    ${pills?`<div class="fl-pills">${pills}</div>`:''}
-    ${f.notes?`<div class="fl-notes">${esc(f.notes)}</div>`:''}
-  </div>`;
-}
-function renderFlightsTab(t){
-  const list = flights.filter(s=>s.tripId===t.id).sort((a,b)=>((a.date||'9999')+(a.time||'')).localeCompare((b.date||'9999')+(b.time||'')));
-  const body = list.length ? `<div class="list">${list.map(f=>swipeWrap('flight', f.id, flightCardHTML(f))).join('')}</div>`
-    : `<div class="empty glass"><b>Noch kein Flug</b>Erfasse deine Flüge inkl. Airline, Flugnummer und Buchungsnummer.</div>`;
-  return body + `<button class="add-btn" onclick="openModal('flight')">＋ Flug hinzufügen</button>`;
-}
-/* Aktivitäten: alles außer Fotografie */
-function renderActivitiesTab(t){
-  const list = activities.filter(s=>s.tripId===t.id && s.type!=='foto').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
-  const body = list.length ? `<div class="list">${list.map(a=>{const sn=stopLabel(a.stopId);return swipeWrap('activity', a.id, `<div class="entry" onclick="openActivityScreen('${a.id}')"><div class="entry-main"><div class="entry-name">${esc(a.name)}</div>${(a.date||a.time)?`<div class="entry-sub">${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}</div>`:''}${sn?`<div class="entry-pills"><span class="cat-pill pill-blue">${esc(sn)}</span></div>`:''}</div><div class="entry-right">›</div></div>`);}).join('')}</div>`
-    : `<div class="empty glass"><b>Noch keine Aktivität</b>Plane Ausflüge, Touren und alles, was du unterwegs machen möchtest.</div>`;
-  return body + `<button class="add-btn" onclick="openModal('activity')">＋ Aktivität hinzufügen</button>`;
-}
 /* Fotografie: immer offene Foto-Ort-Karten direkt im Tab.
    Ein Foto-Ort ist ein activities-Eintrag mit type:'foto' (name = Ort). */
 function renderPhotosTab(t){
@@ -1797,7 +1766,7 @@ function renderPhotosTab(t){
                  .sort((a,b)=>((a.order||0)-(b.order||0)) || String(a.id).localeCompare(String(b.id)));
   const body = list.length
     ? `<div class="foto-list">${list.map(fotoCardHTML).join('')}</div>`
-    : `<div class="empty glass"><b>Noch kein Foto-Ort</b>Leg Orte für deine Shootings an – mit Equipment, Notizen und Referenzbildern.</div>`;
+    : `<div class="empty glass"><b>Noch kein Foto-Ort</b>Leg Orte für deine Shootings an – mit Ausrüstung, Notizen und Referenzbildern.</div>`;
   setTimeout(loadFotoImages, 0);
   return body + `<button class="add-btn" onclick="addFotoPlace()">＋ Foto-Ort hinzufügen</button>`;
 }
@@ -1817,9 +1786,9 @@ function fotoCardHTML(p){
       <button class="foto-del" onclick="deleteFotoPlace('${p.id}')" aria-label="Foto-Ort löschen">✕</button>
     </div>
     <div class="foto-field">
-      <label>Equipment</label>
+      <label>Ausrüstung</label>
       <button class="foto-equip" onclick="openGearPicker('${p.id}')">
-        ${(p.equipment&&p.equipment.length) ? `<span class="foto-pills">${p.equipment.map(e=>`<span class="cat-pill pill-violet">${esc(e)}</span>`).join('')}</span>` : '<span class="foto-equip-empty">Equipment wählen …</span>'}
+        ${(p.equipment&&p.equipment.length) ? `<span class="foto-pills">${p.equipment.map(e=>`<span class="cat-pill pill-violet">${esc(e)}</span>`).join('')}</span>` : '<span class="foto-equip-empty">Ausrüstung wählen …</span>'}
         <span class="foto-equip-chevron">›</span>
       </button>
     </div>
@@ -1854,7 +1823,6 @@ function addFotoPlace(){
   setTimeout(()=>{ const el=document.querySelector(`.foto-card[data-id="${p.id}"] .foto-ort`); if(el) el.focus(); }, 60);
 }
 function renameFotoPlace(id,val){ const p=activities.find(x=>x.id===id); if(!p) return; p.name=(val||'').trim(); persist('activity'); }
-function setFotoEquipment(id,val){ const p=activities.find(x=>x.id===id); if(!p) return; p.equipment = val?val.split(',').map(s=>s.trim()).filter(Boolean):[]; persist('activity'); renderTabContent(); }
 function setFotoNotes(id,val){ const p=activities.find(x=>x.id===id); if(!p) return; p.notes=val; persist('activity'); }
 async function deleteFotoPlace(id){
   const p=activities.find(x=>x.id===id); if(!p) return;
@@ -1900,51 +1868,74 @@ async function viewFotoImage(id, idx){
 }
 function closeImgViewer(){ $('img-viewer').classList.remove('open'); $('img-viewer-img').src=''; }
 
-/* ===== AUSRÜSTUNGSLISTE (global, in Einstellungen pflegbar) ===== */
+/* ===== AUSRÜSTUNG (global, kategorisiert, in Einstellungen pflegbar) ===== */
 function persistGear(){ store.set(KEYS.gear, JSON.stringify(gear)); }
+function gearRowTap(){
+  const el=$('gear-cfg'); if(!el) return;
+  const show=el.style.display==='none';
+  el.style.display=show?'':'none';
+  const c=$('gear-row-chevron'); if(c) c.textContent=show?'⌄':'›';
+  if(show) renderGearManage();
+}
 function renderGearManage(){
   const el=$('gear-list'); if(!el) return;
-  const rows = gear.map((g,i)=>`
-    <div class="gear-row">
-      <input value="${esc(g)}" onchange="gearRename(${i}, this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
-      <button class="gear-del" onclick="gearRemove(${i})" aria-label="Löschen">✕</button>
-    </div>`).join('');
-  const newRow = `
-    <div class="gear-row gear-new">
-      <span class="gear-plus">＋</span>
-      <input id="gear-new-input" placeholder="Neues Equipment …"
-             onkeydown="if(event.key==='Enter'){event.preventDefault();gearAddManage();}"
-             onblur="gearAddManage(true)">
-    </div>`;
-  el.innerHTML = rows + newRow;
+  const sub=$('gear-row-sub'); if(sub){ const n=gearAll().length; sub.textContent=n+' '+(n===1?'Gegenstand':'Gegenstände'); }
+  el.innerHTML = GEAR_CATS.map(cat=>{
+    const items=gear[cat]||[];
+    const rows=items.map((g,i)=>`
+      <div class="gear-row">
+        <input value="${esc(g)}" onchange="gearRename('${cat}',${i}, this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+        <button class="gear-del" onclick="gearRemove('${cat}',${i})" aria-label="Löschen">✕</button>
+      </div>`).join('');
+    const newRow=`
+      <div class="gear-row gear-new">
+        <span class="gear-plus">＋</span>
+        <input id="gear-new-${cat}" placeholder="Hinzufügen …"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();gearAddManage('${cat}');}"
+               onblur="gearAddManage('${cat}', true)">
+      </div>`;
+    return `<div class="gear-cat"><div class="gear-cat-label">${cat}</div><div class="gear-cat-items">${rows}${newRow}</div></div>`;
+  }).join('');
 }
-function gearRename(i, val){
+function gearRename(cat,i,val){
+  if(!gear[cat]) return;
   const name=(val||'').trim();
-  if(!name){ gear.splice(i,1); persistGear(); renderGearManage(); return; }
-  gear[i]=name; persistGear();
+  if(!name){ gear[cat].splice(i,1); persistGear(); renderGearManage(); return; }
+  gear[cat][i]=name; persistGear(); renderGearManage();
 }
-function gearRemove(i){ gear.splice(i,1); persistGear(); renderGearManage(); }
-function gearAddManage(silent){
-  const inp=$('gear-new-input'); if(!inp) return;
+function gearRemove(cat,i){ if(!gear[cat]) return; gear[cat].splice(i,1); persistGear(); renderGearManage(); }
+function gearAddManage(cat,silent){
+  const inp=$('gear-new-'+cat); if(!inp) return;
   const name=inp.value.trim(); if(!name) return;
-  if(!gear.includes(name)) gear.push(name);
+  if(!gear[cat]) gear[cat]=[];
+  if(!gearAll().includes(name)) gear[cat].push(name);
   persistGear(); renderGearManage();
-  if(!silent){ const n=$('gear-new-input'); if(n) n.focus(); }
+  if(!silent){ const n=$('gear-new-'+cat); if(n) n.focus(); }
 }
 
-/* Equipment pro Foto-Ort aus der globalen Liste wählen */
+/* Ausrüstung pro Foto-Ort aus der Liste wählen (nach Kategorien gruppiert) */
 let _gearPickId=null, _gearItems=[];
-function openGearPicker(placeId){ _gearPickId=placeId; renderGearChoices(); $('gear-overlay').classList.add('open'); }
+function openGearPicker(placeId){ _gearPickId=placeId; renderGearChoices(); $('gear-overlay').classList.add('open'); attachSheetSwipe('gear-overlay', closeGearPicker); }
 function closeGearPicker(){ $('gear-overlay').classList.remove('open'); _gearPickId=null; renderTabContent(); loadFotoImages(); }
 function renderGearChoices(){
   const p=activities.find(x=>x.id===_gearPickId); if(!p) return;
   const sel=p.equipment||[];
-  _gearItems=[...gear]; sel.forEach(s=>{ if(!_gearItems.includes(s)) _gearItems.push(s); });
+  const all=gearAll();
+  _gearItems=[];
   const check='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
-  $('gear-choices').innerHTML = _gearItems.map((it,idx)=>{
-    const on=sel.includes(it);
-    return `<button class="gear-choice${on?' on':''}" onclick="toggleGearForPlace(${idx})"><span class="gc-check">${check}</span><span class="gc-label">${esc(it)}</span></button>`;
-  }).join('') || '<div class="foto-equip-empty" style="padding:8px 4px">Noch kein Equipment – füge unten etwas hinzu oder lege es in den Einstellungen an.</div>';
+  let html='';
+  GEAR_CATS.forEach(cat=>{
+    let items=[...(gear[cat]||[])];
+    if(cat==='Zubehör'){ sel.forEach(s=>{ if(!all.includes(s) && !items.includes(s)) items.push(s); }); }
+    if(!items.length) return;
+    html+=`<div class="gc-cat-label">${cat}</div>`;
+    items.forEach(it=>{
+      const idx=_gearItems.length; _gearItems.push(it);
+      const on=sel.includes(it);
+      html+=`<button class="gear-choice${on?' on':''}" onclick="toggleGearForPlace(${idx})"><span class="gc-check">${check}</span><span class="gc-label">${esc(it)}</span></button>`;
+    });
+  });
+  $('gear-choices').innerHTML = html || '<div class="foto-equip-empty" style="padding:8px 4px">Noch keine Ausrüstung – lege sie in den Einstellungen an.</div>';
 }
 function toggleGearForPlace(idx){
   const item=_gearItems[idx]; if(item===undefined) return;
@@ -1955,34 +1946,17 @@ function toggleGearForPlace(idx){
   persist('activity');
   renderGearChoices();
 }
-function gearAddFromPicker(){
-  const inp=$('gear-add-input'); if(!inp) return;
-  const name=inp.value.trim(); if(!name) return;
-  if(!gear.includes(name)){ gear.push(name); persistGear(); }
-  const p=activities.find(x=>x.id===_gearPickId);
-  if(p){ if(!p.equipment) p.equipment=[]; if(!p.equipment.includes(name)) p.equipment.push(name); persist('activity'); }
-  inp.value='';
-  renderGearChoices();
-}
 
-const PACK_TEMPLATE = [['Reisepass','Dokumente'],['Impfpass','Dokumente'],['Auslandskrankenversicherung','Dokumente'],['Flugtickets / Buchungen','Dokumente'],['Ladekabel & Netzteil','Technik'],['Powerbank','Technik'],['Reiseadapter','Technik'],['Kamera-Body','Fotografie'],['Objektive','Fotografie'],['Speicherkarten','Fotografie'],['Ersatzakkus','Fotografie'],['Stativ','Fotografie'],['Sonnencreme','Hygiene & Gesundheit'],['Mückenschutz','Hygiene & Gesundheit'],['Reiseapotheke','Hygiene & Gesundheit']];
-function renderPackingTab(t){
-  const list = packing.filter(s=>s.tripId===t.id);
-  const cats = [...new Set(list.map(i=>i.category||'Sonstiges'))];
-  const done = list.filter(i=>i.checked).length;
-  let body;
-  if (!list.length) {
-    body = `<div class="empty glass"><b>Packliste ist leer</b>Füge Gegenstände hinzu oder starte mit einer Standard-Vorlage.</div><button class="add-btn" onclick="loadPackTemplate()">✨ Standard-Vorlage laden</button>`;
-  } else {
-    body = `<div class="check-progress">${done} von ${list.length} gepackt</div>` + cats.map(cat=>{
-      const items = list.filter(i=>(i.category||'Sonstiges')===cat);
-      return `<div class="section-label" style="margin-top:18px">${esc(cat)}</div><div class="check-group glass" style="padding:6px">${items.map(i=>`<div class="check-row ${i.checked?'checked':''}" onclick="toggleCheck('pack','${i.id}')"><div class="checkbox ${i.checked?'checked':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="check-body"><div class="check-name">${esc(i.name)}</div></div><button class="check-del" onclick="event.stopPropagation();removeItem('pack','${i.id}')">✕</button></div>`).join('')}</div>`;
-    }).join('');
-  }
-  return body + `<div class="quick-row" style="margin-top:14px"><div class="field"><input type="text" id="quick-pack-name" placeholder="Gegenstand hinzufügen …" onkeydown="if(event.key==='Enter')quickAddPack()"></div></div><button class="add-btn" onclick="quickAddPack()">＋ Hinzufügen</button>`;
+/* Sheet nach unten wegwischen zum Schließen (nur vom oberen Rand aus) */
+function attachSheetSwipe(overlayId, closeFn){
+  const overlay=$(overlayId); if(!overlay) return;
+  const modal=overlay.querySelector('.modal'); if(!modal || modal._swipeWired) return;
+  modal._swipeWired=true;
+  let startY=0, cur=0, dragging=false, atTop=true;
+  modal.addEventListener('touchstart', e=>{ if(e.touches.length!==1){ dragging=false; return; } startY=e.touches[0].clientY; cur=0; dragging=true; atTop=modal.scrollTop<=0; modal.style.transition='none'; }, {passive:true});
+  modal.addEventListener('touchmove', e=>{ if(!dragging) return; const dy=e.touches[0].clientY-startY; if(dy>0 && atTop){ cur=dy; modal.style.transform='translateY('+dy+'px)'; } else if(dy<0){ dragging=false; modal.style.transform=''; } }, {passive:true});
+  modal.addEventListener('touchend', ()=>{ if(!dragging) return; dragging=false; modal.style.transition=''; const drop=cur; modal.style.transform=''; if(drop>110) closeFn(); }, {passive:true});
 }
-function quickAddPack(){ const inp=$('quick-pack-name'); const n=inp.value.trim(); if(!n) return; packing.push({id:uid(),tripId:currentTripId,name:n,category:'Sonstiges',checked:false}); persist('pack'); inp.value=''; renderTabContent(); }
-async function loadPackTemplate(){ const ok=await showDialog('Fügt eine Standard-Packliste mit gängigen Kategorien hinzu.',{title:'Standard-Vorlage laden',okText:'Hinzufügen'}); if(!ok) return; PACK_TEMPLATE.forEach(([name,category])=>packing.push({id:uid(),tripId:currentTripId,name,category,checked:false})); persist('pack'); renderTabContent(); }
 
 /* Checkliste im Apple-Notizen-Stil: rahmenlos, direkt eintippbar,
    erledigte werden durchgestrichen und ans Ende geschoben. */
@@ -2029,39 +2003,6 @@ function addTodoInline(silent){
   if (!silent) { const next=$('todo-new'); if(next) next.focus(); }
 }
 function toggleCheck(type,id){ const it=arr(type).find(x=>x.id===id); if(!it) return; it.checked=!it.checked; persist(type); renderTabContent(); }
-async function removeItem(type,id){ const ok=await showDialog('Diesen Eintrag wirklich löschen?',{title:'Löschen',okText:'Löschen'}); if(!ok) return; setArr(type, arr(type).filter(x=>x.id!==id)); persist(type); renderTabContent(); }
-
-/* ===== AKTIVITÄTS-DETAIL SCREEN ===== */
-let currentActivityId = null;
-function openActivityScreen(id){ currentActivityId=id; renderActivityScreen(); $('activity-screen').classList.add('open'); }
-/* Bearbeiten öffnet je nach Eintrag das Aktivitäts- oder das Fotografie-Formular */
-function editCurrentActivity(){
-  const a = activities.find(x=>x.id===currentActivityId); if(!a) return;
-  openModal(a.type==='foto' ? 'photo' : 'activity', currentActivityId);
-}
-function closeActivityScreen(){ $('activity-screen').classList.remove('open','settled'); currentActivityId=null; renderTabContent(); }
-async function renderActivityScreen(){
-  const a = activities.find(x=>x.id===currentActivityId);
-  if (!a) { closeActivityScreen(); return; }
-  $('as-name').textContent = a.name;
-  const sn = stopLabel(a.stopId);
-  $('as-sub').textContent = [a.type==='foto'?'Fotografie':'Aktivität', sn, fmtDate(a.date)].filter(Boolean).join(' · ') || '\u00A0';
-  const rows = [];
-  if (a.date||a.time) rows.push(['Wann', `${fmtDate(a.date)||'?'}${a.time?' · '+esc(a.time)+' Uhr':''}`]);
-  if (sn) rows.push(['Stopp', esc(sn)]);
-  if (a.notes) rows.push(['Notizen', esc(a.notes)]);
-  let html = rows.length ? `<div class="glass detail-block">${rows.map(r=>`<div class="detail-row"><span class="dl">${r[0]}</span><span class="dv">${r[1]}</span></div>`).join('')}</div>` : '';
-  if (a.type==='foto') {
-    if (a.equipment && a.equipment.length) html += `<div class="section-label">Equipment</div><div class="glass detail-block"><div class="chip-list">${a.equipment.map(e=>`<span class="chip">${esc(e)}</span>`).join('')}</div></div>`;
-    if (a.motives && a.motives.length) html += `<div class="section-label">Motive</div><div class="glass detail-block"><div class="motive-list">${a.motives.map(m=>`<div class="motive-item">${esc(m)}</div>`).join('')}</div></div>`;
-    if (a.images && a.images.length) {
-      const srcs = await resolveImageSrcs(a.images);
-      if (srcs.length) html += `<div class="section-label">Referenzbilder</div><div class="glass detail-block"><div class="img-viewer-grid">${srcs.map(s=>`<img src="${s}" alt="">`).join('')}</div></div>`;
-    }
-  }
-  if (!html) html = `<div class="empty glass">Keine weiteren Details hinterlegt. Tippe oben rechts auf ✎ zum Bearbeiten.</div>`;
-  $('activity-detail').innerHTML = html;
-}
 
 /* ===== FORMULAR-MODAL ===== */
 const TITLES = { trip:'Reise', stop:'Stopp', hotel:'Hotel', flight:'Flug', car:'Mietwagen', activity:'Aktivität', photo:'Fotografie', pack:'Gegenstand', todo:'Aufgabe' };
@@ -2246,7 +2187,6 @@ async function saveModal(){
   persist(type);
   closeModal();
   if (type==='trip'){ renderHome(); if(currentTripId) renderTripScreen(); }
-  else if ((type==='activity'||type==='photo') && currentActivityId){ renderActivityScreen(); renderTabContent(); }
   else renderTabContent();
   showToast('Gespeichert');
 }
@@ -2279,7 +2219,7 @@ async function applyBackup(rawText){
   trips=p.trips||[]; stops=p.stops||[]; hotels=p.hotels||[]; flights=p.flights||[]; cars=p.cars||[]; activities=p.activities||[]; packing=p.packing||[]; todos=p.todos||[];
   visited=Array.isArray(p.visited)?p.visited:[]; store.set(KEYS.visited, JSON.stringify(visited));
   autoTrips=Array.isArray(p.autoTrips)?p.autoTrips:[]; store.set(KEYS.autoTrips, JSON.stringify(autoTrips));
-  if (Array.isArray(p.gear)) { gear=p.gear; store.set(KEYS.gear, JSON.stringify(gear)); }
+  if (p.gear){ if (Array.isArray(p.gear)){ const flat=p.gear; gear=emptyGear(); flat.forEach(n=>{ if(n) gear[gearClassify(n)].push(n); }); } else { gear=normalizeGear(p.gear); } store.set(KEYS.gear, JSON.stringify(gear)); }
   ['trip','stop','hotel','flight','car','activity','pack','todo'].forEach(persist);
   if (idbReady) { await idbClear(); if (Array.isArray(p.imageStore)) { for (const rec of p.imageStore) { if (rec && rec.id) await idbPut(rec.id, rec.data); } } }
   await migrateInlineImages();
@@ -2293,7 +2233,7 @@ let cloudCfg=safeParse(store.get(CLOUD_CFG_KEY),null);
 let _cloudTimer=null,_cloudBusy=false;
 function toggleCloudCfg(){ const el=$('cloud-cfg'); const show=el.style.display==='none'; el.style.display=show?'':'none'; const c=$('cloud-row-chevron'); if(c) c.textContent=show?'⌄':'›'; if(show) loadCloudCfgUI(); }
 function cloudRowTap(){ toggleCloudCfg(); }
-function openSettings(){ renderAppLockUI(); renderCloudRow(); renderGearManage(); $('settings-screen').classList.add('open'); }
+function openSettings(){ renderAppLockUI(); renderCloudRow(); const gc=$('gear-cfg'); if(gc) gc.style.display='none'; const gch=$('gear-row-chevron'); if(gch) gch.textContent='›'; renderGearManage(); $('settings-screen').classList.add('open'); }
 function closeSettings(){ $('settings-screen').classList.remove('open','settled'); }
 function renderCloudRow(){ const sub=$('cloud-row-sub'); if(!sub) return; if(cloudReady()&&cloudCfg&&cloudCfg.lastOk) sub.textContent='Aktiv · zuletzt '+new Date(cloudCfg.lastOk).toLocaleDateString('de-DE'); else if(cloudReady()) sub.textContent='Eingerichtet – noch kein Backup gelaufen'; else sub.textContent='Verschlüsselt zu GitHub – einrichten'; }
 function loadCloudCfgUI(){ if(!cloudCfg){ renderCloudStatus(); return; } $('cb-repo').value=cloudCfg.repo||''; $('cb-token').value=cloudCfg.token||''; $('cb-pass').value=cloudCfg.pass||''; $('cb-auto').checked=cloudCfg.auto!==false; renderCloudStatus(); }
