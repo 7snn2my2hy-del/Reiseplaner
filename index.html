@@ -168,7 +168,7 @@
   #trip-tiles .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   /* Swipe-Architektur wie Finanzen: tile-wrap clippt, tile-slider verschiebt sich */
   .tile-wrap { position: relative; border-radius: 26px; overflow: hidden; touch-action: pan-y; }
-  .tile-slider { display: flex; flex-direction: row; width: 100%; transition: transform 0.42s var(--spring); }
+  .tile-slider { display: flex; flex-direction: row; width: 100%; touch-action: pan-y; transition: transform 0.42s var(--spring); }
   .tile-slider.swiping { will-change: transform; }
   .tile-slider.no-transition { transition: none; }
   .tile-slider .trip-tile { flex: 0 0 100%; width: 100%; }
@@ -1467,9 +1467,11 @@ function attachSwipeGeneric(wrap, onDelete, onEdit) {
     const mx = t.clientX - startX;
     const my = t.clientY - startY;
     if (!decided) {
-      if (Math.abs(mx) < 4 && Math.abs(my) < 4) return;
+      if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+      // Voreingenommen zum Scrollen: nur als horizontalen Swipe werten, wenn die
+      // Bewegung deutlich horizontaler als vertikal ist – sonst scrollt die Liste normal.
       decided = true;
-      horizontal = Math.abs(mx) > Math.abs(my);
+      horizontal = Math.abs(mx) > Math.abs(my) * 1.3 && Math.abs(mx) > 8;
       if (horizontal) slider.classList.add('swiping');
     }
     if (!horizontal) { if (openAtStart) { settle(false); openAtStart = false; } return; }
