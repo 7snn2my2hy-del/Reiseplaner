@@ -275,7 +275,7 @@
   .rt-cmark.pin svg { color: var(--petrol); }
   .rt-cdate .rt-day { font-size: 0.9rem; font-weight: 700; color: var(--muted); }
   /* ===== FOTOGRAFIE: Foto-Ort-Karten ===== */
-  .foto-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
+  .foto-list { display: flex; flex-direction: column; gap: 16px; margin-top: 4px; }
   .foto-card { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 16px; }
   .foto-head { display: flex; align-items: center; gap: 10px; }
   .foto-ort { flex: 1; min-width: 0; background: transparent; border: none; color: var(--text); font: inherit; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; padding: 2px 0; }
@@ -412,6 +412,13 @@
   .stat { flex: 1; padding: 4px 6px 10px; text-align: center; position: relative; min-width: 0; }
   .stat + .stat::before { content: ""; position: absolute; left: 0; top: 6%; height: 72%; width: 1px; background: var(--stroke); }
   .stat-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-2); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-ic { display: flex; align-items: center; justify-content: center; height: 22px; margin-bottom: 5px; }
+  .stat-ic svg { width: 18px; height: 18px; }
+  .ic-flight svg { color: var(--violet); }
+  .ic-car svg { color: var(--green); }
+  .ic-hotel svg { color: var(--orange); }
+  .ic-activity svg { color: var(--petrol); }
+  .ic-foto svg { color: var(--accent); }
   .stat-value { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .sl-count { color: var(--muted-2); font-weight: 600; }
 
@@ -1310,6 +1317,7 @@ const ICON_PLANE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16
 const ICON_BED = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 7a1 1 0 0 0-2 0v11a1 1 0 0 0 2 0v-2h16v2a1 1 0 0 0 2 0v-7a4 4 0 0 0-4-4H4V7Zm0 4h5a2 2 0 0 1 2 2v1H4v-3Zm9 3v-1a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1h-7Z"/></svg>';
 const ICON_PIN = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 4.7 6.2 12.3 6.4 12.6a.8.8 0 0 0 1.2 0C12.8 21.3 19 13.7 19 9a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>';
 const ICON_CAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 11l1.5-4.3A2 2 0 0 1 8.4 5.3h7.2a2 2 0 0 1 1.9 1.4L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v.5a1.5 1.5 0 0 1-3 0V18H8v.5a1.5 1.5 0 0 1-3 0V18H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5Zm2.1-.5h9.8l-1-2.9a.5.5 0 0 0-.5-.35H8.6a.5.5 0 0 0-.5.35L7.1 10.5ZM6.5 13.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm11 0a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg>';
+const ICON_CAMERA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 3l-1.4 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.6L15 3H9Zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Z"/></svg>';
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 const ICON_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 
@@ -1559,11 +1567,11 @@ function renderOverviewTab(t){
       ${dur ? `<span class="ov-when-dur">${esc(dur)}</span>` : ''}
     </div>` : ''}
     <div class="ov-stats">
-      <div class="stat"><div class="stat-label">Flüge</div><div class="stat-value">${c('flight')}</div></div>
-      <div class="stat"><div class="stat-label">Mietwagen</div><div class="stat-value">${c('car')}</div></div>
-      <div class="stat"><div class="stat-label">Hotels</div><div class="stat-value">${c('hotel')}</div></div>
-      <div class="stat"><div class="stat-label">Aktivitäten</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type!=='foto').length}</div></div>
-      <div class="stat"><div class="stat-label">Fotografie</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type==='foto').length}</div></div>
+      <div class="stat"><div class="stat-ic ic-flight">${ICON_PLANE}</div><div class="stat-value">${c('flight')}</div></div>
+      <div class="stat"><div class="stat-ic ic-car">${ICON_CAR}</div><div class="stat-value">${c('car')}</div></div>
+      <div class="stat"><div class="stat-ic ic-hotel">${ICON_BED}</div><div class="stat-value">${c('hotel')}</div></div>
+      <div class="stat"><div class="stat-ic ic-activity">${ICON_PIN}</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type!=='foto').length}</div></div>
+      <div class="stat"><div class="stat-ic ic-foto">${ICON_CAMERA}</div><div class="stat-value">${activities.filter(x=>x.tripId===t.id&&x.type==='foto').length}</div></div>
     </div>
   </div>`;
   return hero + renderTodosSection(t) + renderPackSection(t);
@@ -1772,7 +1780,7 @@ function renderPhotosTab(t){
     ? `<div class="foto-list">${list.map(fotoCardHTML).join('')}</div>`
     : `<div class="empty glass"><b>Noch kein Foto-Ort</b>Leg Orte für deine Shootings an – mit Ausrüstung, Notizen und Referenzbildern.</div>`;
   setTimeout(loadFotoImages, 0);
-  return body + `<button class="add-btn" onclick="addFotoPlace()">＋ Foto-Ort hinzufügen</button>`;
+  return body + `<button class="add-btn" onclick="addFotoPlace()">＋ Hinzufügen</button>`;
 }
 function fotoCardHTML(p){
   const pills = (p.equipment&&p.equipment.length)
